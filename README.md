@@ -8,12 +8,20 @@ A simple Windows desktop app in WPF that tracks monthly expense/income budget, n
 
 ### Quick Start: Preview the app functions with sample data
 Run the application Budget Model.exe in the folder Budget Model\bin\Debug\. The app will first show the **Budget Statement** screen, with sample data that has already been categorized. Use the buttons at the top right to navigate to other screens, including the **Historical Budget and Net Worth Analysis** screen and the **Investments** screen.
+
+**Main screen: Budget Statement**
 ![Budget Statement screen](/images/Main%20window.png)
-![Budget Statement screen](/images/Historical%20Analysis%20-%20Net%20Worth,%20monthly%20savings,%20income,%20expenses.png)
-![Budget Statement screen](/images/Investments%20analysis.png)
+
+**Historical Analysis screen**
+![Historical Analysis screen](/images/Historical%20Analysis%20-%20Net%20Worth,%20monthly%20savings,%20income,%20expenses.png)
+
+**Investments screen**
+![Investment Analysis screen](/images/Investments%20analysis.png)
 
 The sample data which was uploaded to the app is found in the folder \test_data.  The **Data & Definitions** screen is where bank activity reports and brokerage statements can get uploaded, and where categories can be set for purchases or income that appears on statements.  The categorization consists of keyword matching, that will assign the same category to all statement items that have the same set of words in their descriptions.
-![Budget Statement screen](/images/Categorizing%20transaction%20items%20in%20accounts.png)
+
+**Data & Definitions screen**
+![Data & Definitions screen](/images/Categorizing%20transaction%20items%20in%20accounts.png)
 
 ### Quick Start: Personalize 
 A number of items need to be set up for first use.
