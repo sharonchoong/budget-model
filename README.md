@@ -1,4 +1,4 @@
-#Budget Model App
+# Budget Model App
 
 A simple Windows desktop app in WPF that tracks monthly expense/income budget, net worth, and financial investments across all bank and brokerage accounts.  
 
@@ -6,16 +6,16 @@ A simple Windows desktop app in WPF that tracks monthly expense/income budget, n
 - Can program the app to read any account report/statement format, and show any kind of analysis desired without restriction
 - Unlike personal finance app solutions like Mint, Quicken and Quickbooks, there is no automatic linking/synchronizing with accounts, so bank passwords and login details are never entrusted to companies or saved in any database
 
-###Quick Start: Preview the app functions with sample data
+### Quick Start: Preview the app functions with sample data
 Run the application Budget Model.exe in the folder Budget Model\bin\Debug\. The app will first show the **Budget Statement** screen, with sample data that has already been categorized. Use the buttons at the top right to navigate to other screens, including the **Historical Budget and Net Worth Analysis** screen and the **Investments** screen.
-![Budget Statement screen](/images/Main window.png)
-![Budget Statement screen](/images/Historical Analysis - Net Worth, monthly savings, income, expenses.png)
-![Budget Statement screen](/images/Investments analysis.png)
+![Budget Statement screen](/images/Main%20window.png)
+![Budget Statement screen](/images/Historical%20Analysis%20-%20Net%20Worth,%20monthly%20savings,%20income,%20expenses.png)
+![Budget Statement screen](/images/Investments%20analysis.png)
 
 The sample data which was uploaded to the app is found in the folder \test_data.  The **Data & Definitions** screen is where bank activity reports and brokerage statements can get uploaded, and where categories can be set for purchases or income that appears on statements.  The categorization consists of keyword matching, that will assign the same category to all statement items that have the same set of words in their descriptions.
-![Budget Statement screen](Categorizing transaction items in accounts.png)
+![Budget Statement screen](/images/Categorizing%20transaction%20items%20in%20accounts.png)
 
-###Quick Start: Personalize 
+### Quick Start: Personalize 
 A number of items need to be set up for first use.
 1. FinancialInstitutions_Sample.cs in the Models folder
 	The *GetFinancialInstitutions* method in the *FinancialInstitution* class returns the list of bank accounts and brokerage accounts at all financial institutions which this app analyzes. Before first use, this list must be written in the code.  If the method is not implemented, the sample list found in the derived abstract class *BaseFinancialInstitution* in the file  *IFinancialInstitution.cs* will be used, which includes *BankSample* and *BrokerageSample*. 
@@ -30,7 +30,7 @@ A number of items need to be set up for first use.
 	- Initial balance
 		The app computes the balance on your bank accounts based on a rolling sum of all your transactions.  Therefore, to show accurate bank account balances, the app needs the full history of bank transactions since the account was opened.  If a limited history of transactions for one account is uploaded, the initial account balance immediately prior to the earliest date of uploaded transactions must also be provided as a separate initial "transaction".
 
-###Other files to be modified
+### Other files to be modified
 The following files can be personalized.
 
 1. Configuration files
@@ -42,14 +42,14 @@ The following files can be personalized.
 2. The database - SQLite
 	For illustration, the app currently uses a sample database *BudgetData_Sample.db*.  In the database, the Categories and InvestmentCategories tables store the list of categories used by the application.  All other tables are filled by user input and may be modified. SQLite was used. It is lightweight and suitable for local data storage.
 	
-###License
+### License
 This project is licensed under GNU AGPLv3, which makes the complete source code available, but any work using the code must be similarly licensed open-source under AGPL.
 
-###Always room for improvement
+### Always room for improvement
 - [ ] More flexibility in adding and sorting categories
 - [ ] Interface to set bank accounts and holders (currently required to be set up on code-behind)
 - [ ] Interface to define different report formats (currently required to be set up on code-behind)
 - [ ] Retirement account integration
 
-###Contact
+### Contact
 [My Github Pages website](https://sharonchoong.github.io/)
