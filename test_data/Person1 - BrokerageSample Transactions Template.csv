@@ -1,0 +1,7 @@
+Date,Description,Symbol,Amount,Price_Quantity
+1/4/2019,Bought Stock1,SPY,"1,000.00",5 shares at $200
+1/5/2019,Bought Stock2,Stock2,"1,750.00",4 shares at $437.5
+1/6/2019,Bought Stock3,Stock3,"1,750.00",1 share at $1750
+3/3/2019,Bought Stock1,SPY,500,2 shares at $250.00
+4/30/2019,Bought Stock2,Stock2,500,1 share at $500
+6/30/2019,Sold Stock1,SPY,750,2 shares at $250.00

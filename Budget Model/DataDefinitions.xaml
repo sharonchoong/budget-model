@@ -1,0 +1,142 @@
+﻿<Page x:Class="Budget_Model.DataDefinitions"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Budget_Model"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+      Title="Data and Definitions" MinHeight="750" MinWidth="1325">
+
+    <Grid x:Name="LayoutRoot">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid Name="UploadGrid" Grid.Row="0" Grid.Column="0" Margin="10" Background="AliceBlue">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <ItemsControl Name="HoldersRadio" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="10" ItemsSource="{Binding HoldersItems}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" ></WrapPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton GroupName="rdioHolders" Checked="SelectionChanged" Margin="0,0,20,0" Tag="{Binding HolderName}"  Content="{Binding HolderName}" IsChecked="{Binding IsChecked}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ComboBox ItemsSource="{Binding FinancialInstitutions}" Grid.Row="1" Grid.Column="0" Margin="10" Width="200" Name="comboBank" 
+                      SelectionChanged="BankChanged" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <ComboBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ComboBoxItem}">
+                        <Setter Property="IsSelected" Value="{Binding IsChecked}"/>
+                    </Style>
+                </ComboBox.ItemContainerStyle>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Tag="{Binding ShortName}"  Text="{Binding InstitutionName}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ItemsControl Name="AccountRadio" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Margin="10" ItemsSource="{Binding Accounts}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" ></WrapPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton GroupName="rdioAccounts" Checked="AccountTypeChecked" Margin="0,0,20,0" Tag="{Binding AccountType}"  Content="{Binding AccountTypeDescription}" IsChecked="{Binding IsChecked}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ComboBox ItemsSource="{Binding ReportFormats}" Grid.Row="1" Grid.Column="1" Margin="10" Width="200" Name="comboFormat" 
+                      SelectionChanged="FormatChanged" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <ComboBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ComboBoxItem}">
+                        <Setter Property="IsSelected" Value="{Binding IsChecked}"/>
+                    </Style>
+                </ComboBox.ItemContainerStyle>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Tag="{Binding ShortName}"  Text="{Binding FormatName}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Grid.Row="2" Grid.Column="1" Margin="5"  VerticalAlignment="Center" Name="StatementText" Visibility="Collapsed">Statement End Date</TextBlock>
+            <DatePicker Grid.Row="2" Grid.Column="1" local:DatePickerCalendar.IsMonthYear="True" local:DatePickerDateFormat.DateFormat="MMM dd, yyyy"
+                    x:Name="date_statement" AllowDrop="True" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5" Visibility="Collapsed"/>
+            <Button Grid.Row="3" Grid.Column="0" Name="UploadButton" Click="UploadButton_Click" Width="120"
+                 Margin="10" HorizontalAlignment="Left" VerticalAlignment="Center" >Upload CSV file</Button>
+        </Grid>
+
+        <Grid Name="GrossSalaryGrid" Grid.Row="0" Grid.Column="1" Margin="10" Background="AliceBlue">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Grid.Column="0" Margin="20" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <TextBlock Margin="0,0,0,0"  VerticalAlignment="Center">Default Gross Salary: $</TextBlock>
+                <TextBlock Margin="0,0,10,0"  VerticalAlignment="Center" Name="default_gross_salary" HorizontalAlignment="Right">0</TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="20" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <TextBlock Margin="0,0,10,0"  VerticalAlignment="Center">Gross Salary ($)</TextBlock>
+                <DatePicker Grid.Row="1" Grid.Column="0" SelectedDateChanged="SalaryDate_SelectedDateChanged"
+                    local:DatePickerCalendar.IsMonthYear="True" local:DatePickerDateFormat.DateFormat="MM/dd/yyyy"
+                    x:Name="date_month" AllowDrop="True" HorizontalAlignment="Center" VerticalAlignment="Center"></DatePicker>
+                <TextBox Name="txt_gross_salary" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Padding="5"></TextBox>
+                <Button Grid.Row="2" Grid.Column="0" Name="SalaryButton" Click="SalaryButton_Click" Width="50" Height="26"
+                 HorizontalAlignment="Left" VerticalAlignment="Center" >Save</Button>
+            </StackPanel>
+        </Grid>
+
+        <ComboBox Grid.Row="1" Grid.Column="0" Margin="10" Width="200" Name="comboDate" SelectionChanged="SelectionChanged"
+                  HorizontalAlignment="Left" VerticalAlignment="Center">
+            <ComboBoxItem Selector.IsSelected="True">Last 3 Months</ComboBoxItem>
+            <ComboBoxItem >Last 6 Months</ComboBoxItem>
+            <ComboBoxItem >Last Year</ComboBoxItem>
+            <ComboBoxItem >Last 2 Years</ComboBoxItem>
+            <ComboBoxItem >All</ComboBoxItem>
+        </ComboBox>
+        <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Name="DataGridDefinitions" BeginningEdit="GridBeginningEdit" CellEditEnding="GridCellEditEnding" 
+                  ItemsSource="{Binding}" AutoGenerateColumns="False" Margin="10" ColumnWidth="*" CanUserAddRows="False">
+            <DataGrid.Columns>
+                <DataGridComboBoxColumn Header="Holder" Width="Auto" x:Name="Holders" 
+                    SelectedValueBinding="{Binding holder}"  
+                    DisplayMemberPath="{Binding holder}" />
+                <DataGridTextColumn Header="Date" IsReadOnly="True" Width="Auto"  Binding="{Binding date, StringFormat=\{0:MM/dd/yy\}}"/>
+                <DataGridTextColumn Header="Bank" IsReadOnly="True" Width="Auto" Binding="{Binding bank}" />
+                <DataGridTextColumn Header="Amount" IsReadOnly="True" Width="Auto" Binding="{Binding amount}" CellStyle="{StaticResource RightAlignment}" />
+                <DataGridTextColumn Header="Description" IsReadOnly="True" Binding="{Binding description}" />
+                <DataGridTextColumn Header="Keyword" Width="Auto" Binding="{Binding keyword}" />
+                <DataGridComboBoxColumn Header="Category" Width="Auto" MinWidth="100" x:Name="Categories" 
+                    SelectedValueBinding="{Binding category}"  
+                    DisplayMemberPath="{Binding category}" />
+                <DataGridComboBoxColumn Header="Category Override" Width="Auto" MinWidth="100" x:Name="CustomCategories" 
+                    SelectedValueBinding="{Binding custom_category}"  
+                    DisplayMemberPath="{Binding custom_category}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</Page>

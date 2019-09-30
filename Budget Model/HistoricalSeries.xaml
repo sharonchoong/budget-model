@@ -1,0 +1,152 @@
+﻿<Page x:Class="Budget_Model.HistoricalSeries"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Budget_Model"
+      xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+      Title="Historical Series" MinHeight="900" MinWidth="900">
+
+    <Grid x:Name="LayoutRoot" Margin="21,10,18,19">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="611*" />
+            <ColumnDefinition Width="643*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold"
+               Text="Historical Budget and Net Worth Analysis From " HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <DatePicker Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" SelectedDateChanged="SelectionChanged"
+                    local:DatePickerCalendar.IsMonthYear="True" local:DatePickerDateFormat.DateFormat="MMM 1, yyyy"
+                    x:Name="date_month_from" AllowDrop="True" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                    Margin="280,10,10,10" RenderTransformOrigin="0.706,0.5"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+               Margin="420,12,200,12" FontWeight="Bold" 
+               Text=" To " HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="-0.696,0.5" />
+        <DatePicker Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" SelectedDateChanged="SelectionChanged"
+                    local:DatePickerCalendar.IsMonthYear="True" local:DatePickerDateFormat.DateFormat="MMM dd, yyyy"
+                    x:Name="date_month_to" AllowDrop="True" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                    Margin="450,10,10,10" RenderTransformOrigin="0.706,0.5"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Name="alertLoading" Margin="100,12,50,12" FontWeight="Bold" FontSize="16" Visibility="Hidden"
+               Text="Loading..." HorizontalAlignment="Right" VerticalAlignment="Center" RenderTransformOrigin="-0.696,0.5" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" TextDecorations="Underline" Name="NetWorthChartTitle"
+               Text="Monthly Net Worth Over Time" HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        <lvc:CartesianChart x:Name="NetWorthChart" Series="{Binding Series_NetWorth}" Grid.Row="2" Grid.Column="0" LegendLocation="Top" MinHeight="250" Margin="30,0,30,20">
+            <lvc:CartesianChart.AxisX>
+                <lvc:Axis  LabelFormatter="{Binding NetWorthFormatter}" FontSize="12" LabelsRotation="270" Foreground="Black">
+                    <lvc:Axis.Separator>
+                        <lvc:Separator StrokeThickness="1" Step="{Binding step}" ></lvc:Separator>
+                    </lvc:Axis.Separator>
+                </lvc:Axis>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis LabelFormatter="{Binding CurrencyFormatter}" Foreground="Black"></lvc:Axis>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
+
+        <TextBlock Grid.Row="1" Grid.Column="1" TextDecorations="Underline" Name="NetSavingsChartTitle"
+               Text="Monthly Net Savings excluding Miscellaneous" HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        <lvc:CartesianChart x:Name="SavingsChart" Series="{Binding Series_Savings}"  Grid.Row="2" Grid.Column="1" LegendLocation="Top" MinHeight="250" Margin="30,0,30,20">
+            <lvc:CartesianChart.AxisX>
+                <lvc:Axis LabelFormatter="{Binding MonthFormatter}" FontSize="12" LabelsRotation="270" Foreground="Black">
+                    <lvc:Axis.Separator>
+                        <lvc:Separator StrokeThickness="1" Step="{Binding step}" ></lvc:Separator>
+                    </lvc:Axis.Separator>
+                </lvc:Axis>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis LabelFormatter="{Binding CurrencyFormatter}" Foreground="Black"></lvc:Axis>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
+
+        <ComboBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Width="200" Name="comboCategory" SelectionChanged="Category_Changed"
+                  Text="Category" HorizontalAlignment="Left" VerticalAlignment="Center" >
+        </ComboBox>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="210,0,0,0" TextDecorations="Underline" Name="CategoryChartTitle"
+               Text=" By Month" HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        <lvc:CartesianChart x:Name="CategoryChart" Series="{Binding Series_Category}" Grid.Row="4" Grid.Column="0" LegendLocation="Top" MinHeight="250" Margin="30,0,30,10">
+            <lvc:CartesianChart.AxisX>
+                <lvc:Axis  LabelFormatter="{Binding MonthFormatter}" FontSize="12" LabelsRotation="270" Foreground="Black" >
+                    <lvc:Axis.Separator>
+                        <lvc:Separator StrokeThickness="1" Step="{Binding step}"  ></lvc:Separator>
+                    </lvc:Axis.Separator>
+                </lvc:Axis>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis LabelFormatter="{Binding CurrencyFormatter}" Foreground="Black">
+                    <lvc:Axis.Sections>
+                        <lvc:AxisSection Label="Income" Value="0" SectionWidth="100000">
+                            <lvc:AxisSection.Fill>
+                                <SolidColorBrush Color="Green" Opacity=".1"></SolidColorBrush>
+                            </lvc:AxisSection.Fill>
+                        </lvc:AxisSection>
+                        <lvc:AxisSection Label="Income" Value="-100000" SectionWidth="100000">
+                            <lvc:AxisSection.Fill>
+                                <SolidColorBrush Color="Red" Opacity=".1"></SolidColorBrush>
+                            </lvc:AxisSection.Fill>
+                        </lvc:AxisSection>
+                    </lvc:Axis.Sections>
+                </lvc:Axis>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
+
+        <TextBlock Grid.Row="3" Grid.Column="1" TextDecorations="Underline" Name="StackedChartTitle"
+               Text="Historical Monthly Expenses Breakdown" HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        <lvc:CartesianChart Grid.Row="4" Grid.Column="1" Series="{Binding StackedSeriesCollection}" LegendLocation="Bottom" Margin="30,0,30,10">
+            <lvc:CartesianChart.AxisX>
+                <lvc:Axis  LabelFormatter="{Binding MonthFormatter}" FontSize="12" LabelsRotation="270" Foreground="Black" >
+                    <lvc:Axis.Separator>
+                        <lvc:Separator StrokeThickness="1" Step="{Binding step}" ></lvc:Separator>
+                    </lvc:Axis.Separator>
+                </lvc:Axis>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis LabelFormatter="{Binding CurrencyFormatter}" Foreground="Black"></lvc:Axis>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
+
+        <ComboBox ItemsSource="{Binding HoldersItems}" Grid.Row="5" Grid.Column="0" Margin="0,2,0,2" Width="70" Name="comboFor" SelectionChanged="GridSelectionChanged"
+                  HorizontalAlignment="Left" VerticalAlignment="Center">
+            <ComboBox.ItemContainerStyle>
+                <Style TargetType="{x:Type ComboBoxItem}">
+                    <Setter Property="IsSelected" Value="{Binding IsChecked}"/>
+                </Style>
+            </ComboBox.ItemContainerStyle>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Tag="{Binding HolderName}"  Text="{Binding HolderName}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <DataGrid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Name="DataGridAverage"
+                  ItemsSource="{Binding}" AutoGenerateColumns="False" Margin="10,0,10,20" ColumnWidth="*" CanUserAddRows="False">
+            <DataGrid.RowHeaderTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
+                                  AncestorType={x:Type DataGridRow}}, 
+                                  Path=Item.RowHeader}"/>
+                </DataTemplate>
+            </DataGrid.RowHeaderTemplate>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Savings" IsReadOnly="True" Binding="{Binding savings, StringFormat=\{0:C2\}}" CellStyle="{StaticResource RightAlignment}" />
+                <DataGridTextColumn Header="Expenses" IsReadOnly="True" Binding="{Binding expenses, StringFormat=\{0:C2\}}" CellStyle="{StaticResource RightAlignment}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Page>
