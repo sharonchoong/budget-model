@@ -1,0 +1,262 @@
+﻿<Page x:Class="Budget_Model.BudgetStatement"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Budget_Model"
+      xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+      Title="Budget Statement" MinHeight="750" MinWidth="1325">
+
+    <Grid x:Name="LayoutRoot" Margin="21,10,18,19">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="611*" />
+            <ColumnDefinition Width="643*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition MaxHeight="120"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="1" Grid.Column="0" FontSize="10" Name="alert_undefined"
+               Text="Data looks good" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <Button Grid.Row="0" Grid.Column="1" Name="InvestmentsButton" Click="InvestmentsButton_Click" Width="120"
+                 HorizontalAlignment="Right" VerticalAlignment="Center" >Investments</Button>
+            <Button Grid.Row="0" Grid.Column="2" Name="HistoricalButton" Click="HistoricalButton_Click" Width="120"
+                 HorizontalAlignment="Right" VerticalAlignment="Center" >Historical Series</Button>
+            <Button Grid.Row="0" Grid.Column="3" Name="DataDefinitionsButton" Click="DataDefinitionsButton_Click" Width="120"
+                 HorizontalAlignment="Right" VerticalAlignment="Center" >Data &amp; Definitions</Button>
+        </Grid>
+        
+        <TextBlock Grid.Row="1" Grid.Column="0"
+               Margin="10,12,0,12" FontWeight="Bold" 
+               Text="Budget Statement for the month ended " HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <DatePicker Grid.Row="1" Grid.Column="0" SelectedDateChanged="SelectionChanged"
+                    local:DatePickerCalendar.IsMonthYear="True" local:DatePickerDateFormat.DateFormat="MM/dd/yyyy"
+                    x:Name="date_month" AllowDrop="True" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="322,10,187.11,10" RenderTransformOrigin="0.706,0.5"/>
+        <TextBlock Grid.Row="1" Grid.Column="0"
+               Margin="0,12,120,12" FontWeight="Bold" 
+               Text=" for " HorizontalAlignment="Right" VerticalAlignment="Center" RenderTransformOrigin="-0.696,0.5" />
+        <ComboBox ItemsSource="{Binding HoldersItems}" Grid.Row="1" Grid.Column="0" Margin="0,10,10,10" Width="70" Name="comboFor" SelectionChanged="SelectionChanged"
+                  HorizontalAlignment="Right" VerticalAlignment="Center">
+            <ComboBox.ItemContainerStyle>
+                <Style TargetType="{x:Type ComboBoxItem}">
+                    <Setter Property="IsSelected" Value="{Binding IsChecked}"/>
+                </Style>
+            </ComboBox.ItemContainerStyle>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Tag="{Binding HolderName}"  Text="{Binding HolderName}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ItemsControl ItemsSource="{Binding listOfRegisters}" Grid.Row="2" Grid.Column="0">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="{Binding Columns}"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBox Text="{Binding Data}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Grid Grid.Row="2" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Assets" Margin="10,2,10,2" FontWeight="Bold" FontStyle="Italic" Foreground="DarkSlateBlue"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <Grid x:Name="NetWorthGrid" Grid.Row="1" Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+            </Grid>
+        </Grid>
+        <Border Grid.Row="3" Grid.Column="0" Width="2000" HorizontalAlignment="Left" VerticalAlignment="Top"  BorderBrush="Black" BorderThickness="0,1,0,0"></Border>
+        <Grid x:Name="StatementGrid" Grid.Row="3" Grid.Column="0" Grid.RowSpan="2" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <!-- all titles/categories -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Income" Margin="10,2,10,2" FontWeight="Bold" FontStyle="Italic" Foreground="DarkSlateBlue"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="1" Grid.Column="0" Text="Gross Salary" Margin="40,2,10,2"
+                   HorizontalAlignment="Left" VerticalAlignment="Center"  MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="2" Grid.Column="0" Text="Retirement Contribution" Margin="40,2,10,2"
+                   HorizontalAlignment="Left" VerticalAlignment="Center"  MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="3" Grid.Column="0" Text="Other Withholdings and Taxes" Margin="40,2,10,2"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="4" Grid.Column="0" Text="Net Pay Earnings" Margin="20,2,10,2"
+                   HorizontalAlignment="Left" VerticalAlignment="Center"  MouseLeftButtonDown="UpdateGrid"/>
+            <TextBlock  Grid.Row="5" Grid.Column="0" Text="Retirement Income" Margin="20,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center"  MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="6" Grid.Column="0" Text="Other Income" Margin="20,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center"  MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="7" Grid.Column="0" Text="Total Income" Margin="20,2,10,2" FontWeight="Bold"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="8" Grid.Column="0" Text="Expenses" Margin="10,2,10,2" FontWeight="Bold" FontStyle="Italic" Foreground="DarkSlateBlue"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="9" Grid.Column="0" Text="Rent or Mortgage" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="10" Grid.Column="0" Text="Utilities" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="11" Grid.Column="0" Text="Commute" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="12" Grid.Column="0" Text="Groceries" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="13" Grid.Column="0" Text="Restaurants" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="14" Grid.Column="0" Text="Cash" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="15" Grid.Column="0" Text="Living Expenses" Margin="20,2,10,2" FontWeight="DemiBold"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="16" Grid.Column="0" Text="Shopping" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="17" Grid.Column="0" Text="Entertainment" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="18" Grid.Column="0" Text="Travel" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="19" Grid.Column="0" Text="Medical" Margin="40,2,10,2" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="20" Grid.Column="0" Text="Other Expenses" Margin="20,2,10,2" FontWeight="DemiBold"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="21" Grid.Column="0" Text="Total Expenses" Margin="20,2,10,2" FontWeight="Bold"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <Border Grid.Row="21" Grid.Column="5" Width="400" HorizontalAlignment="Left" VerticalAlignment="Top"  BorderBrush="Black" BorderThickness="0,1,0,0"></Border>
+            <TextBlock  Grid.Row="22" Grid.Column="0" Text="Savings before Miscellaneous Items" Margin="10,2,10,2" FontWeight="Bold" 
+                        FontStyle="Italic" Foreground="DarkSlateBlue" HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="23" Grid.Column="0" Text="Miscellaneous Items" Margin="20,2,10,2" FontWeight="Bold" 
+                        Foreground="DarkSlateBlue" HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="24" Grid.Column="0" Text="Investment Gains or Losses" Margin="20,2,10,2" FontWeight="Bold" 
+                   Foreground="DarkSlateBlue" HorizontalAlignment="Left" VerticalAlignment="Center"  MouseLeftButtonDown="UpdateGrid" />
+            <TextBlock  Grid.Row="25" Grid.Column="0" Text="Net Savings" Margin="10,2,10,2" FontWeight="Bold" 
+                        FontStyle="Italic" Foreground="DarkSlateBlue" HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
+
+            <!-- all amounts -->
+            <TextBlock  Grid.Row="1" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_gross_salary"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="2" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_ret_contribution"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="3" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_other_withholding"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="4" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_netpay"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="5" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_ret_income"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="6" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_other_income"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="7" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_total_income"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
+            <TextBlock  Grid.Row="9" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_rent"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="10" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_utilities"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="11" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_commute"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="12" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_groceries"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="13" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_restaurants"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="14" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_cash"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="15" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_living_expense"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="DemiBold" />
+            <TextBlock  Grid.Row="16" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_shopping"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="17" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_entertainment"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="18" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_travel"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="19" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_medical"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="20" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_other_expense"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="DemiBold" />
+            <TextBlock  Grid.Row="21" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_total_expense"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
+            <TextBlock  Grid.Row="22" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_savings_before_misc"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
+            <TextBlock  Grid.Row="23" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_misc"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="24" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_investment_gains"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock  Grid.Row="25" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_net_savings"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
+        </Grid>
+        <TextBlock  Grid.Row="1" Grid.Column="2" Text="Income/Expense Breakdown compared to Last Month" Margin="73,12,73,12" FontWeight="Bold"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <lvc:CartesianChart Grid.Row="2" Grid.Column="2" Grid.RowSpan="2" LegendLocation="Bottom" Margin="30,0,0,0" Series="{Binding SeriesCollection_budget}">
+            <lvc:CartesianChart.AxisX>
+                <lvc:Axis Labels="{Binding Labels}" FontSize="12" LabelsRotation="270" >
+                    <lvc:Axis.Separator>
+                        <lvc:Separator StrokeThickness="2" Step="1" StrokeDashArray="2"  ></lvc:Separator>
+                    </lvc:Axis.Separator>
+                </lvc:Axis>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis LabelFormatter="{Binding Formatter}"></lvc:Axis>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
+        
+        <DataGrid Grid.Row="4" Grid.Column="2" Name="DataGridLineItems" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True" Margin="30,0,0,0" ColumnWidth="*">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Date"  Binding="{Binding date, StringFormat=\{0:MM/dd/yy\}}" Width="Auto"/>
+                <DataGridTextColumn Header="Category" Binding="{Binding category}" Width="Auto" />
+                <DataGridTextColumn Header="Amount" Binding="{Binding amount, StringFormat=C2}" CellStyle="{StaticResource RightAlignment}" Width="Auto" />
+                <DataGridTextColumn Header="Description" Binding="{Binding description}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Page>
