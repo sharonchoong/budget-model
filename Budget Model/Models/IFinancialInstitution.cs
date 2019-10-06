@@ -16,7 +16,7 @@ namespace Budget_Model.Models
         string ShortName { get; }
         Account[] Accounts { get; }
     }
-    public abstract class BaseFinancialInstitution: IFinancialInstitution
+    public abstract class BaseFinancialInstitution : IFinancialInstitution
     {
         public string InstitutionName { get; protected set; }
         public string ShortName { get; protected set; }
@@ -44,35 +44,40 @@ namespace Budget_Model.Models
         public virtual FinancialInstitution[] GetFinancialInstitutions()
         {
             var fi1 = new FinancialInstitution("BankSample", "B1");
-            fi1.AddAccounts(new Account[] 
+            fi1.AddAccounts(new[]
             {
                 new Account(AccountType.Checking),
                 new Account(AccountType.Savings)
             });
             var fi2 = new FinancialInstitution("BrokerageSample", "B2");
-            fi2.AddAccounts(new Account[] 
+            fi2.AddAccounts(new[]
             {
-                new Account(AccountType.Brokerage, new ReportFormat[] 
+                new Account(AccountType.Brokerage, new ReportFormat[]
                 {
                     ///can specify different export formats for the same bank/financial institution
                     new StatementReportFormat("Brokerage Statement Format"),
                     new TransactionReportFormat("Brokerage Orders and Activity Format")
                 })
             });
-            return new FinancialInstitution[] { fi1, fi2 };
+            return new[] { fi1, fi2 };
         }
     }
-    
+
     public class Account
     {
         public AccountType AccountType { get; protected set; }
-        public string AccountTypeDescription {
+        public string AccountTypeDescription
+        {
             get
             {
                 if (AccountType == AccountType.CreditCard)
+                {
                     return "Credit Card";
+                }
                 else
+                {
                     return AccountType.ToString();
+                }
             }
         }
         public ReportFormat[] ExcelImportFormats { get; protected set; }
@@ -91,10 +96,10 @@ namespace Budget_Model.Models
                 rf = new StatementReportFormat("Default Format");
             else
                 rf = new TransactionReportFormat("Default Format");
-            ExcelImportFormats = new ReportFormat[] { rf };
+            ExcelImportFormats = new[] { rf };
         }
 
-        public Account(AccountType account_type, ReportFormat[] import_formats )
+        public Account(AccountType account_type, ReportFormat[] import_formats)
         {
             AccountType = account_type;
             ExcelImportFormats = import_formats;
@@ -115,9 +120,13 @@ namespace Budget_Model.Models
             get
             {
                 if (this is StatementReportFormat)
+                {
                     return "Statement";
+                }
                 else
+                {
                     return "Orders and Activity";
+                }
             }
         }
     }
@@ -140,7 +149,7 @@ namespace Budget_Model.Models
     public class StatementReportFormat : ReportFormat
     {
         private bool? _needs_statement_date = null;
-        
+
         /// <summary>
         /// Indicates whether the as-of date of brokerage statements needs to be specified manually (if it is not provided in the CSV export) 
         /// </summary>
@@ -151,8 +160,12 @@ namespace Budget_Model.Models
                 return _needs_statement_date == null ? false : true;
             }
         }
-
-        public StatementReportFormat(string format_name, bool? needs_statement_date = null)
+        public StatementReportFormat(string format_name)
+        {
+            FormatName = format_name;
+            _needs_statement_date = null;
+        }
+        public StatementReportFormat(string format_name, bool? needs_statement_date)
         {
             FormatName = format_name;
             _needs_statement_date = needs_statement_date;

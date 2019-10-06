@@ -19,7 +19,11 @@ namespace Budget_Model.Models
         public string Bank { get; set; }
         public string Symbol { get; set; }
 
-        public BrokerageAsset(string symbol = "")
+        public BrokerageAsset()
+        {
+            Symbol = "";
+        }
+        public BrokerageAsset(string symbol)
         {
             Symbol = symbol;
         }
@@ -42,7 +46,7 @@ namespace Budget_Model.Models
                         comm.Parameters.Add("@description", DbType.String, 500).Value = Description;
                         comm.Parameters.Add("@value", DbType.Double).Value = Value;
                         comm.Parameters.Add("@holder", DbType.String, 50).Value = Holder;
-                        comm.Parameters.Add("@bank", DbType.String, 50).Value = Bank;
+                        comm.Parameters.Add("@bank", DbType.String, 50).Value = Bank + "_broker";
 
                         conn.Open();
                         comm.ExecuteNonQuery();
@@ -64,7 +68,9 @@ namespace Budget_Model.Models
                     qry += " FROM Investments";
                     qry += " WHERE [date] = (SELECT MAX([date]) FROM Investments WHERE [date] <= date(@date, 'start of month','+1 month','-1 day')) ";
                     if (selected_person != "Home")
+                    {
                         qry += " AND holder = '" + selected_person + "' ";
+                    }
                     qry += " order by category_sort, category_order, ending_mkt_value DESC";
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                     {
@@ -88,12 +94,18 @@ namespace Budget_Model.Models
                         a.category, category_order, SUM(a.ending_mkt_value) as ending_mkt_value FROM Investments a 
                         WHERE a.[date] BETWEEN @start and @end ";
                     if (specific_category != null)
+                    {
                         qry += " AND category = '" + specific_category + "'";
+                    }
                     else
+                    {
                         qry += " AND category IS NOT NULL ";
+                    }
 
                     if (selected_person != "Home")
+                    {
                         qry += " AND holder = '" + selected_person + "'";
+                    }
                     qry += " GROUP by [date], " + (asset_column == null ? "" : asset_column + ", ") + "category, category_order ORDER BY [date], category_order";
 
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
@@ -122,10 +134,12 @@ namespace Budget_Model.Models
                     {
                         // Call Read before accessing data.
                         if (reader.HasRows)
+                        {
                             while (reader.Read())
                             {
                                 firstasset = reader.GetString(0);
                             }
+                        }
 
                         // Call Close when done reading.
                         reader.Close();

@@ -19,7 +19,6 @@ namespace Budget_Model.Models
         {
             string qry = "SELECT COALESCE((SELECT COUNT(1) FROM Statements where category is null and date(date) BETWEEN date(@start) AND date(@end)), 0 ) as undefined, ";
             qry += " coalesce((SELECT COUNT(1) FROM statements WHERE date(date) BETWEEN date(@start) AND date(@end) GROUP BY id HAVING COUNT(1) > 1 LIMIT 1),0) as duplicates";
-            //qry += " coalesce((SELECT TOP 1 COUNT(1) FROM statements WHERE date BETWEEN @start AND @end GROUP BY id HAVING COUNT(1) > 1),0) as duplicates";
             Tuple<int, int> tuple;
             using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
             {
@@ -54,7 +53,9 @@ namespace Budget_Model.Models
                 using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                 {
                     if (holder != "Home")
+                    {
                         cmd.Parameters.Add("@holder", DbType.String, 50).Value = holder;
+                    }
                     cmd.Parameters.AddWithValue("@startdate", start_month.ToString("yyyy-MM-dd"));
                     conn.Open();
                     using (var reader = cmd.ExecuteReader())
@@ -64,7 +65,9 @@ namespace Budget_Model.Models
                         {
                             double amount = 0;
                             if (!reader.IsDBNull(reader.GetOrdinal("amount")))
+                            {
                                 amount = reader.GetDouble(reader.GetOrdinal("amount"));
+                            }
                             string category = reader.GetString(reader.GetOrdinal("category"));
                             result.Add(category, amount);
                         }
@@ -99,7 +102,9 @@ namespace Budget_Model.Models
                     cmd.Parameters.AddWithValue("@lastquarter", new DateTime(Convert.ToDateTime(month_to_compare).Year, Convert.ToDateTime(month_to_compare).Month, 1).ToString("yyyy-MM-dd"));
                     cmd.Parameters.AddWithValue("@thisquarter", new DateTime(Convert.ToDateTime(statement_date).Year, Convert.ToDateTime(statement_date).Month, 1).ToString("yyyy-MM-dd"));
                     if (holder != "Home")
+                    {
                         cmd.Parameters.Add("@holder", DbType.String, 50).Value = holder;
+                    }
                     conn.Open();
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -126,34 +131,48 @@ namespace Budget_Model.Models
                 {
                     qry = "SELECT SUM(amount) FROM Entries WHERE date([date]) <= date(@enddate) AND bank = @bank";
                     if (acctype == AccountType.Checking)
+                    {
                         bank += "_checking";
+                    }
                     else
+                    {
                         bank += "_savings";
+                    }
                 }
                 else if (acctype == AccountType.Brokerage)
+                {
                     qry = "SELECT SUM(ending_mkt_value) FROM FinancialAssets WHERE date([date]) = date(@enddate) AND bank = @bank";
+                }
                 if (holder != "Home")
+                {
                     qry += " AND holder = @holder";
+                }
                 using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                 {
                     cmd.Parameters.AddWithValue("@enddate", statement_date.ToString("yyyy-MM-dd HH:mm:ss"));
                     if (holder != "Home")
+                    {
                         cmd.Parameters.AddWithValue("@holder", holder);
+                    }
                     if (bank != "")
+                    {
                         cmd.Parameters.AddWithValue("@bank", bank);
+                    }
                     conn.Open();
-                    string test = cmd.ExecuteScalar().ToString();
                     if (cmd.ExecuteScalar() != null)
+                    {
                         double.TryParse(cmd.ExecuteScalar().ToString(), out result);
+                    }
                     conn.Close();
                 }
             }
             return result;
         }
 
-        public static DataTable GetTransactionsByCategory(string category, DateTime statement_date, string selected_person)
+        public static DataTable GetTransactionsByCategory(string _category, DateTime statement_date, string selected_person)
         {
-            switch (category)
+            string category = "";
+            switch (_category)
             {
                 case "Net Pay Earnings":
                     category = "Payroll"; break;
@@ -185,14 +204,20 @@ namespace Budget_Model.Models
                     {
                         qry = "select date, category, description, amount from Statements WHERE";
                         if (selected_person != "Home")
+                        {
                             qry += " holder = @holder AND";
+                        }
                         qry += " date([date]) BETWEEN date(@start) AND date(@end)";
                         if (category != null && !string.IsNullOrWhiteSpace(category))
                         {
                             if (category == "Income")
+                            {
                                 qry += " AND amount > 0 AND category != 'Miscellaneous' ";
+                            }
                             else if (category == "Expenses")
+                            {
                                 qry += " AND amount < 0 AND category != 'Miscellaneous' ";
+                            }
                             else if (category == "Gross Salary")
                             {
                                 qry += " AND description like '%employer match%' AND category = 'Retirement Contribution' ";
@@ -200,7 +225,9 @@ namespace Budget_Model.Models
                                 qry += ((selected_person != "Home") ? " AND holder = @holder" : "") + " GROUP BY [date]";
                             }
                             else
+                            {
                                 qry += " AND category = @category";
+                            }
                         }
 
                     }
@@ -211,9 +238,13 @@ namespace Budget_Model.Models
                         adapter.SelectCommand.Parameters.AddWithValue("@start", start_month.ToString("yyyy-MM-dd"));
                         adapter.SelectCommand.Parameters.AddWithValue("@end", statement_date.ToString("yyyy-MM-dd"));
                         if (category != null && !string.IsNullOrWhiteSpace(category))
+                        {
                             adapter.SelectCommand.Parameters.Add("@category", DbType.String, 500).Value = category;
+                        }
                         if (selected_person != "Home")
+                        {
                             adapter.SelectCommand.Parameters.Add("@holder", DbType.String, 500).Value = selected_person;
+                        }
                         adapter.Fill(dt);
                     }
                 }
@@ -262,6 +293,7 @@ namespace Budget_Model.Models
                 {
                     string qry = "";
                     if ((to_month - from_month).TotalDays < 93)
+                    {
                         qry = @"SELECT a.period, a.holder, SUM(a.amount) OVER (PARTITION BY holder ORDER BY a.period) AS amount FROM 
                         NetSavings_bef_misc_Weekly a 
                         WHERE a.period BETWEEN DATE(@start, 'weekday 0', '+7 days') and DATE(@end, 'weekday 0', '+7 days')
@@ -269,7 +301,9 @@ namespace Budget_Model.Models
                         NetSavings_bef_misc_Weekly b 
                         WHERE b.period BETWEEN DATE(@start, 'weekday 0', '+7 days') and DATE(@end, 'weekday 0', '+7 days')
                         ORDER BY [period]";
+                    }
                     else
+                    {
                         qry = @"SELECT a.period, a.holder, a.amount FROM 
                         NetSavings_bef_misc_Monthly a 
                         WHERE a.period BETWEEN date(@start) and date(@end)
@@ -277,6 +311,7 @@ namespace Budget_Model.Models
                         NetSavings_bef_misc_Monthly b 
                         WHERE b.period BETWEEN date(@start) and date(@end)
                         GROUP BY b.period ORDER BY [period]";
+                    }
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                     {
                         adapter.SelectCommand = cmd;
@@ -323,10 +358,14 @@ namespace Budget_Model.Models
                         qry = @"SELECT DATETIME(a.period) as period, 'Home' as holder, a.category, a.amount FROM Home_" + frequency + @" a 
                         WHERE DATE(a.period) BETWEEN date(@start) and date(@end) " + (selected_category != "" ? "AND a.category = '" + selected_category + "'" : "");
                         if (selected_category == "")
+                        {
                             qry += " AND a.category != 'Miscellaneous' AND a.category != 'Investment Gains' and amount < 0";
+                        }
                         if (selected_category != "")
+                        {
                             qry += @" UNION SELECT DATETIME(b.period) as period, holder, b.category,  b.amount FROM Individual_" + frequency + @" b 
-                        WHERE DATE(b.period) BETWEEN date(@start) and date(@end) AND b.category = '" + selected_category + "'";
+                            WHERE DATE(b.period) BETWEEN date(@start) and date(@end) AND b.category = '" + selected_category + "'";
+                        }
                         qry += " ORDER BY [period]";
 
                     }
@@ -347,22 +386,30 @@ namespace Budget_Model.Models
             Tuple<string, string, string> mean_median_std = new Tuple<string, string, string>("", "", "");
             string qry_table = "";
             if (type == "expenses")
+            {
                 qry_table = "(SELECT period, SUM(amount) as amount FROM " + (selected_person == "Home" ? "Home" : "Individual") + @"_Monthly
                           WHERE period BETWEEN date(@start) and date(@end) " + (selected_person == "Home" ? "" : "AND holder = @holder ") + @"
                           AND category != 'Miscellaneous' AND amount < 0 GROUP BY period)a";
+            }
             else if (type == "savings")
             {
                 if (selected_person != "Home")
+                {
                     qry_table = @"(SELECT * FROM NetSavings_bef_misc_Monthly a 
                               WHERE a.period BETWEEN date(@start) and date(@end) AND holder = @holder)a";
+                }
                 else
+                {
                     qry_table = @"(SELECT SUM(amount) as amount FROM NetSavings_bef_misc_Monthly a 
                               WHERE a.period BETWEEN date(@start) and date(@end) GROUP BY [period])a";
+                }
             }
             else
+            {
                 qry_table = "(SELECT * FROM " + (selected_person == "Home" ? "Home" : "Individual") + @"_Monthly a 
                           WHERE a.period BETWEEN date(@start) and date(@end) " + (selected_person == "Home" ? "" : "AND a.holder = @holder ") + @"
                          AND a.category = '" + type + "')a";
+            }
 
 
             using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
@@ -374,7 +421,9 @@ namespace Budget_Model.Models
                 using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                 {
                     if (selected_person != "Home")
+                    {
                         cmd.Parameters.Add("@holder", DbType.String, 50).Value = selected_person;
+                    }
                     cmd.Parameters.AddWithValue("@start", from_month.ToString("yyyy-MM-dd"));
                     cmd.Parameters.AddWithValue("@end", to_month.ToString("yyyy-MM-dd"));
                     conn.Open();

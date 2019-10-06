@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:Budget_Model"
       mc:Ignorable="d" 
       d:DesignHeight="300" d:DesignWidth="300"
-      Title="Data and Definitions" MinHeight="750" MinWidth="1325">
+      Title="Data and Definitions" MinHeight="650" MinWidth="800">
 
     <Grid x:Name="LayoutRoot">
         <Grid.ColumnDefinitions>

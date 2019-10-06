@@ -25,8 +25,8 @@ namespace Budget_Model
         public Func<double, string> NetWorthFormatter { get; set; }
         public Func<double, string> MonthFormatter { get; set; }
         public Func<double, string> CurrencyFormatter { get; set; }
-        List<Task> tasks = new List<Task>();
-        string[] categories = null;
+        private List<Task>  tasks = new List<Task>();
+        private string[] categories;
         public string monthformat { get; set; } = "MMM yyy";
         public double step { get; set; } = 1;
         public class DateModel
@@ -39,23 +39,9 @@ namespace Budget_Model
         public HistoricalSeries()
         {
             InitializeComponent();
-            Tuple<DateTime, DateTime> dates = BankTransaction.GetDates("Home");
             date_month_to.SelectedDateChanged -= SelectionChanged;
             date_month_from.SelectedDateChanged -= SelectionChanged;
-            if (dates != null)
-            {
-                date_month_to.SelectedDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(1).AddDays(-1);
-                date_month_to.DisplayDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(1).AddDays(-1);
-                date_month_from.SelectedDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(-11);
-                date_month_from.DisplayDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(-11);
-            }
-            else
-            {
-                date_month_to.SelectedDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddDays(-1);
-                date_month_to.DisplayDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddDays(-1);
-                date_month_from.SelectedDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-11).AddDays(-1);
-                date_month_from.DisplayDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-11).AddDays(-1);
-            }
+            Helpers.Initializer.SetDates(date_month_from, date_month_to);
             date_month_to.SelectedDateChanged += SelectionChanged;
             date_month_from.SelectedDateChanged += SelectionChanged;
 
@@ -65,10 +51,7 @@ namespace Budget_Model
             comboCategory.SelectedIndex = 0;
             comboCategory.SelectionChanged += Category_Changed;
 
-            Holder holder = new Holder();
-            HoldersItems = holder.HolderCollection(true);
-            comboFor.DataContext = this;
-            comboFor.SelectedIndex = 0;
+            HoldersItems = Helpers.Initializer.SetHolders(comboFor, this);
 
             var dateConfig = Mappers.Xy<DateModel>()
                         .X(dateModel => dateModel.DateTime.AddDays(-16.5).Ticks / (TimeSpan.FromDays(1).Ticks * 30.44))
@@ -221,6 +204,10 @@ namespace Budget_Model
 
         public SeriesCollection Series_NetWorth { get; set; } = new SeriesCollection();
 
+        public void NetWorth_Chart()
+        {
+            NetWorth_Chart(false); 
+        }
         public void NetWorth_Chart(bool change = false)
         {
             DataTable dt = new DataTable();
@@ -233,7 +220,9 @@ namespace Budget_Model
                 to_month = Convert.ToDateTime(date_month_to.SelectedDate);
             });
             if ((to_month - from_month).TotalDays < 93)
+            {
                 datatable = "DailyBalance";
+            }
 
             dt = MonthlyStatement.GetHistoricalNetWorth(datatable, from_month, to_month);
 
@@ -244,7 +233,7 @@ namespace Budget_Model
                 {
                     if (dt.AsEnumerable().Any(r => r["holder"].ToString() == holder.HolderName))
                     {
-                        Series_NetWorth.Add(new LineSeries()
+                        Series_NetWorth.Add(new LineSeries
                         {
                             Values = new ChartValues<DateModel>(dt.AsEnumerable().Where(r => r["holder"].ToString() == holder.HolderName)
                         .Select(r => new DateModel { DateTime = Convert.ToDateTime(r["period"]), Value = r.Field<double?>("NetWorth") ?? 0 })),
@@ -261,6 +250,10 @@ namespace Budget_Model
         }
         
         public SeriesCollection Series_Savings { get; set; } = new SeriesCollection();
+        public void Savings_Chart()
+        {
+            Savings_Chart(false);
+        }
         public void Savings_Chart(bool change = false)
         {
             DataTable dt = new DataTable();
@@ -296,7 +289,11 @@ namespace Budget_Model
         }
 
         public SeriesCollection Series_Category { get; set; } = new SeriesCollection();
-        public void Category_Chart(bool change = false)
+        public void Category_Chart()
+        {
+            Category_Chart(false);
+        }
+        public void Category_Chart(bool change)
         {
             DataTable dt = new DataTable();
             DateTime from_month = new DateTime();
@@ -311,7 +308,9 @@ namespace Budget_Model
             });
             string freq = "Monthly";
             if ((to_month - from_month).TotalDays < 93)
+            {
                 freq = "Weekly";
+            }
             
             dt = MonthlyStatement.GetHistoricalTransactionsByCategory(selected_category, freq, from_month, to_month);
             
@@ -322,7 +321,7 @@ namespace Budget_Model
                 {
                     if (dt.AsEnumerable().Any(r => r["holder"].ToString() == holder.HolderName))
                     {
-                        Series_Category.Add(new LineSeries()
+                        Series_Category.Add(new LineSeries
                         {
                             Values = new ChartValues<DateModel>(dt.AsEnumerable().Where(r => r["holder"].ToString() == holder.HolderName)
                         .Select(r => new DateModel { DateTime = Convert.ToDateTime(r["period"]), Value = r.Field<double?>("amount") ?? 0 })),
@@ -339,7 +338,11 @@ namespace Budget_Model
         }
 
         public SeriesCollection StackedSeriesCollection { get; set; } = new SeriesCollection();
-        public void Stacked_Chart(bool change = false)
+        public void Stacked_Chart()
+        {
+            Stacked_Chart(false);
+        }
+        public void Stacked_Chart(bool change)
         {
             DataTable dt = new DataTable();
             DateTime from_month = new DateTime();
@@ -354,7 +357,9 @@ namespace Budget_Model
             });
             string freq = "Monthly";
             if ((to_month - from_month).TotalDays < 93)
+            {
                 freq = "Weekly";
+            }
             
             dt = MonthlyStatement.GetHistoricalTransactionsByCategory("", freq, from_month, to_month);
 
@@ -367,12 +372,14 @@ namespace Budget_Model
                     ChartValues<DateModel> chartvalues = new ChartValues<DateModel>(dt.AsEnumerable().Where(r => r["category"].ToString() == category)
                             .Select(r => new DateModel { DateTime = Convert.ToDateTime(r["period"]), Value = r.Field<double?>("amount") ?? 0 }));
                     if (chartvalues.Count != 0)
+                    {
                         StackedSeriesCollection.Add(new StackedColumnSeries
                         {
                             Values = chartvalues,
                             StackMode = StackMode.Values,
                             Title = category
                         });
+                    }
                 }
             });
 
@@ -384,15 +391,17 @@ namespace Budget_Model
                 }));
             }
         }
-        
-        public void Make_Grid(bool change = false)
+        public void Make_Grid()
+        {
+            Make_Grid(false);
+        }
+        public void Make_Grid(bool change)
         {
             DataTable dt = new DataTable();
-            string[] selectcategories = categories.Skip(3).ToArray();
             string selected_person = HoldersItems.Where(r => r.IsChecked == true).Select(x => x.HolderName).First();
 
             dt.Columns.Add("RowHeader");
-            foreach (string rowheader in new string[] { "Mean", "Median", "Standard Deviation"})
+            foreach (string rowheader in new [] { "Mean", "Median", "Standard Deviation"})
             {
                 DataRow row = dt.NewRow();
                 row["RowHeader"] = rowheader;
@@ -462,54 +471,6 @@ namespace Budget_Model
                         });
                     }
                 }
-                
-                /**
-                SqlDataAdapter adapter = new SqlDataAdapter();
-                string qry = @"SELECT a.category, AVG(a.amount) as mean, median,
-                        STDEV(a.amount) as std FROM " + (selected_person == "Home" ? "Home" : "Individual") + @"_Monthly a 
-                        INNER JOIN categories on a.category = categories.category
-                        INNER JOIN (select distinct category, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY amount) OVER (PARTITION BY category) as median 
-                         from " + (selected_person == "Home" ? "Home" : "Individual") + @"_Monthly a 
-                          WHERE a.period BETWEEN '" + from_month + @"' and '" + to_month + "' " + (selected_person == "Home" ? "" : "AND a.holder = '" + selected_person + "' ") + @"
-                         AND a.category != 'Miscellaneous' AND a.category NOT LIKE '%Retirement%' AND a.category NOT LIKE '%Investment%'
-                         )b ON a.category = b.category
-                          WHERE a.period BETWEEN '" + from_month + @"' and '" + to_month + @"' " + (selected_person == "Home" ? "" : "AND a.holder = '" + selected_person + "' ") + @"
-                         AND a.category != 'Miscellaneous' AND a.category NOT LIKE '%Retirement%' AND a.category NOT LIKE '%Investment%'
-                         GROUP BY a.category, category_order, median ORDER BY category_order";
-                
-                using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
-                {
-                    SqlCommand cmd = new SqlCommand(qry, conn);
-                    conn.Open();
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    // Call Read before accessing data.
-                    while (reader.Read())
-                    {
-                        Dispatcher.Invoke(() => {
-                            string category = reader.GetString(reader.GetOrdinal("category"));
-                            if (!change)
-                            {
-                                DataGridTextColumn c = new DataGridTextColumn();
-                                c.Header = category;
-                                c.IsReadOnly = true;
-                                c.CellStyle = (System.Windows.Style)FindResource("RightAlignment");
-                                c.Binding = new System.Windows.Data.Binding(category);
-                                DataGridAverage.Columns.Add(c);
-                            }
-
-                            dt.Columns.Add(category);
-                            string mean = (!reader.IsDBNull(reader.GetOrdinal("mean")) ? reader.GetDouble(reader.GetOrdinal("mean")).ToString("C2") : "");
-                            dt.Rows[0][category] = (!reader.IsDBNull(reader.GetOrdinal("mean")) ? reader.GetDouble(reader.GetOrdinal("mean")).ToString("C2") : "");
-                            dt.Rows[1][category] = (!reader.IsDBNull(reader.GetOrdinal("median")) ? reader.GetDouble(reader.GetOrdinal("median")).ToString("C2") : "");
-                            dt.Rows[2][category] = (!reader.IsDBNull(reader.GetOrdinal("std")) ? reader.GetDouble(reader.GetOrdinal("std")).ToString("C2") : "");
-                        });
-                    }
-                    // Call Close when done reading.
-                    reader.Close();
-                    conn.Close();
-                }
-                 **/
                 Dispatcher.Invoke(() => {
                     DataGridAverage.DataContext = dt;
                 });
@@ -520,14 +481,14 @@ namespace Budget_Model
             tasks.Add(expense_task);
         }
 
-        public string[] Fillcategories()
+        public static string[] Fillcategories()
         {
-            List<string> categories = new List<string>();
-            categories.Add("All Expenses ex. Miscellaneous");
-            categories.Add("All Income ex. Miscellaneous");
-            categories.Add("Gross Salary");
-            categories.AddRange(BudgetCategory.GetCategories(true));
-            return categories.ToArray();
+            List<string> _categories = new List<string>();
+            _categories.Add("All Expenses ex. Miscellaneous");
+            _categories.Add("All Income ex. Miscellaneous");
+            _categories.Add("Gross Salary");
+            _categories.AddRange(BudgetCategory.GetCategories(true));
+            return _categories.ToArray();
         }
     }
 }

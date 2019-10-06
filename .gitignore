@@ -2,7 +2,6 @@ Budget Model/Helpers/ExcelImport.cs
 Budget Model/Models/Holders.cs
 Budget Model/Models/FinancialInstitutions.cs
 Budget Model/obj/
-Budget Model/bin/
 Budget Model/Models/FinancialInstitutions.cs
 Budget Model/App_Data/BudgetData.db
 Budget Model/Connections.config

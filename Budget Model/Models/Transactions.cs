@@ -19,7 +19,11 @@ namespace Budget_Model.Models
         public string Bank { get; set; }
         public AccountType AccountType { get; set; } = AccountType.Checking;
 
-        public BankTransaction(AccountType account_type = AccountType.Checking)
+        public BankTransaction()
+        {
+            AccountType = AccountType.Checking;
+        }
+        public BankTransaction(AccountType account_type)
         {
             AccountType = account_type;
         }
@@ -31,18 +35,23 @@ namespace Budget_Model.Models
                 string _query = "INSERT INTO Entries (date,amount,description,holder,bank) SELECT @date, @amount, @description, @holder, @bank";
                 _query += " WHERE NOT EXISTS (SELECT * FROM [Entries] WHERE date=@date and amount=@amount and description=@description and bank=@bank";
                 if (AccountType != AccountType.CreditCard)
+                {
                     _query += " and holder=@holder";
+                }
                 _query += " )";
 
                 string bank_name = Bank;
-                if (AccountType == AccountType.Savings)
-                    bank_name += "_savings";
-                else if (AccountType == AccountType.CreditCard)
-                    bank_name += "_credit";
-                else if (AccountType == AccountType.Brokerage)
-                    bank_name += "_broker";
-                else if (AccountType == AccountType.Checking)
-                    bank_name += "_checking";
+                switch (AccountType)
+                {
+                    case AccountType.Savings:
+                        bank_name += "_savings"; break;
+                    case AccountType.CreditCard:
+                        bank_name += "_credit"; break;
+                    case AccountType.Brokerage:
+                        bank_name += "_broker"; break;
+                    default:
+                        bank_name += "_checking"; break;
+                }
 
                 using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
                 {
@@ -67,10 +76,15 @@ namespace Budget_Model.Models
             {
                 string qry = "select date(min(date)) as start_date, date(max(date)) as end_date from Entries ";
                 if (holder != "Home")
+                {
                     qry += " where holder = @holder ";
+                } 
                 using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                 {
-                    if (holder != "Home") cmd.Parameters.Add("@holder", DbType.String, 50).Value = holder;
+                    if (holder != "Home")
+                    {
+                        cmd.Parameters.Add("@holder", DbType.String, 50).Value = holder;
+                    }
                     conn.Open();
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -165,15 +179,20 @@ namespace Budget_Model.Models
                         comm.Parameters.AddWithValue("@date", Date.ToString("yyyy-MM-dd"));
                         comm.Parameters.Add("@description", DbType.String, 500).Value = Description;
                         comm.Parameters.Add("@holder", DbType.String, 50).Value = Holder;
-                        comm.Parameters.Add("@bank", DbType.String, 50).Value = Bank;
+                        comm.Parameters.Add("@bank", DbType.String, 50).Value = Bank + "_broker";
                         comm.Parameters.Add("@price", DbType.Double).Value = Price;
                         comm.Parameters.Add("@quantity", DbType.Double).Value = Quantity;
                         if (MaturityDate != null)
+                        {
                             comm.Parameters.AddWithValue("@maturity", ((DateTime)MaturityDate).ToString("yyyy-MM-dd"));
+                        }
+
                         else
+                        {
                             comm.Parameters.AddWithValue("@maturity", DBNull.Value);
-                        comm.Parameters.Add("@coupon", DbType.Double).Value = (object)CouponRate ?? DBNull.Value;
-                        comm.Parameters.Add("@yield", DbType.Double).Value = (object)YieldToMaturity ?? DBNull.Value;
+                            comm.Parameters.Add("@coupon", DbType.Double).Value = (object)CouponRate ?? DBNull.Value;
+                            comm.Parameters.Add("@yield", DbType.Double).Value = (object)YieldToMaturity ?? DBNull.Value;
+                        }
 
                         conn.Open();
                         comm.ExecuteNonQuery();
@@ -191,11 +210,17 @@ namespace Budget_Model.Models
                 string qry = @"SELECT * FROM InvestmentTransactions a 
                         WHERE a.[date] BETWEEN @start AND @end ";
                 if (asset == "Treasuries")
+                {
                     qry += "AND asset_symbol LIKE '912%' ";
+                }
                 else
+                {
                     qry += "AND asset_symbol = @asset ";
+                }
                 if (selected_holder != "Home")
+                {
                     qry += " AND holder = '" + selected_holder + "'";
+                }
                 qry += " ORDER BY [date]";
                 using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
                 {
@@ -218,10 +243,20 @@ namespace Budget_Model.Models
     {
         public DateTime Date { get; set; }
         public string Category { get; set; }
-        public string Description { get { return "Change in Investment Value (price and income)"; } set { } }
+        public string Description {
+            get
+            {
+                return "Change in Investment Value (price and income)";
+            }
+            set
+            {
+                Description = "Change in Investment Value (price and income)";
+            }
+        }
         public double Amount { get; set; }
         public string Holder { get; set; }
         public string Bank { get; set; }
+        public AccountType AccountType { get; set; } = AccountType.Brokerage;
 
         public void Save()
         {
@@ -229,6 +264,17 @@ namespace Budget_Model.Models
             {
                 string _query = "INSERT INTO [Entries] (date,amount,description,holder,bank) SELECT @date, @amount, @description, @holder, @bank ";
                 _query += " WHERE NOT EXISTS (SELECT * FROM [Entries] WHERE date=@date and amount=@amount and description=@description and holder=@holder and bank=@bank); ";
+
+                string bank_name = Bank;
+                switch (AccountType)
+                {
+                    case AccountType.Savings:
+                        bank_name += "_savings"; break;
+                    case AccountType.Checking:
+                        bank_name += "_checking"; break;
+                    default:
+                        bank_name += "_broker"; break;
+                }
 
                 using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
                 {
@@ -238,7 +284,7 @@ namespace Budget_Model.Models
                         comm.Parameters.Add("@amount", DbType.Double).Value = Amount;
                         comm.Parameters.Add("@description", DbType.String, 500).Value = Description;
                         comm.Parameters.Add("@holder", DbType.String, 50).Value = Holder;
-                        comm.Parameters.Add("@bank", DbType.String, 50).Value = Bank;
+                        comm.Parameters.Add("@bank", DbType.String, 50).Value = bank_name;
 
                         conn.Open();
                         comm.ExecuteNonQuery();
@@ -257,11 +303,13 @@ namespace Budget_Model.Models
                 {
                     string qry = "";
                     if (datatype == "Cumulative")
+                    {
                         qry = @"SELECT DISTINCT [date], holder, SUM(a.amount) OVER (PARTITION BY holder ORDER BY a.[date]) AS amount
                         FROM Statements a WHERE a.category = 'Investment Gains' AND a.[date] BETWEEN date(@start) and date(@end)
                         UNION SELECT DISTINCT [date], 'Home', SUM(a.amount) OVER (ORDER BY a.[date]) AS amount
                         FROM Statements a WHERE a.category = 'Investment Gains' AND a.[date] BETWEEN date(@start) and date(@end)
                         ORDER BY [date]";
+                    }
                     else if (datatype == "Percentage")
                     {
                         qry = @";WITH t ([date], holder, gain, ending_mkt_value) as
@@ -273,12 +321,14 @@ namespace Budget_Model.Models
                         UNION SELECT [date], 'Home', SUM(gain)/sum(ending_mkt_value) FROM t GROUP BY [date] ORDER BY [date]";
                     }
                     else
+                    {
                         qry = @"SELECT [date], holder, SUM(amount) AS amount
                         FROM Statements WHERE category = 'Investment Gains' AND [date] BETWEEN date(@start) and date(@end)
                         GROUP BY [date], holder
                         UNION SELECT [date], 'Home', SUM(amount) AS amount
                         FROM Statements WHERE category = 'Investment Gains' AND [date] BETWEEN date(@start) and date(@end)
                         GROUP BY [date] ORDER BY [date]";
+                    }
 
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                     {
@@ -308,13 +358,17 @@ namespace Budget_Model.Models
             {
                 string qry = "SELECT gross_salary FROM GrossSalary ";
                 if (default_salary)
+                {
                     qry += @" INNER JOIN (SELECT holder, max(date) as maxdate from GrossSalary GROUP BY holder) a 
                         ON GrossSalary.holder = a.holder and GrossSalary.date = a.maxdate ";
-                qry += " WHERE GrossSalary.holder = @holder" + (default_salary ? "" : " and date = @date");
+                    qry += " WHERE GrossSalary.holder = @holder" + (default_salary ? "" : " and date = @date");
+                }
                 using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                 {
                     if (!default_salary)
+                    {
                         cmd.Parameters.AddWithValue("@date", Date.ToString("yyyy-MM-dd"));
+                    }
                     cmd.Parameters.Add("@holder", DbType.String, 50).Value = Holder;
                     conn.Open();
                     return Convert.ToString(cmd.ExecuteScalar());

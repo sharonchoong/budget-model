@@ -22,43 +22,31 @@ namespace Budget_Model
     public partial class BudgetStatement : Page
     {
         public IEnumerable<Holder> HoldersItems { get; set; }
-        
+
         public BudgetStatement()
         {
             InitializeComponent();
 
-            Holder holder = new Holder();
-            HoldersItems = holder.HolderCollection(true);
-            comboFor.DataContext = this;
-            comboFor.SelectedIndex = 0;
+            HoldersItems = Helpers.Initializer.SetHolders(comboFor, this);
 
-            Tuple<DateTime, DateTime> dates = BankTransaction.GetDates("Home");
             date_month.SelectedDateChanged -= SelectionChanged;
-            if (dates != null)
-            {
-                date_month.SelectedDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(1).AddDays(-1);
-                date_month.DisplayDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(1).AddDays(-1);
-            } else
-            {
-                date_month.SelectedDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddDays(-1);
-                date_month.DisplayDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddDays(-1);
-            }
+            Helpers.Initializer.SetDates(date_month);
             date_month.SelectedDateChanged += SelectionChanged;
 
-            Task first_task = Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(() =>
             {
                 GetAlert();
                 ;
             });
-            Task second_task = Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(() =>
             {
                 FillDataGrid(null);
             });
-            Task third_task = Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(() =>
             {
                 GetStatementItems(true);
             });
-            Task fourth_task = Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(() =>
             {
                 MakeExpenseChart();
             });
@@ -116,8 +104,11 @@ namespace Budget_Model
                 DataGridLineItems.DataContext = dt;
             });
         }
-
-        public void GetStatementItems(bool first = false)
+        public void GetStatementItems()
+        {
+            GetStatementItems(false);
+        }
+        public void GetStatementItems(bool first)
         {
             //filling textblocks 
             MonthlyStatement statement = new MonthlyStatement();
@@ -136,10 +127,10 @@ namespace Budget_Model
                 foreach (FinancialInstitution fi in financialinstitutions.GetFinancialInstitutions().Where(e => e.Accounts.Any(a => a.AccountType != AccountType.CreditCard)))
                 {
                     if (first)
+                    {
                         NetWorthGrid.RowDefinitions.Add(new RowDefinition());
-                    TextBlock txt_fi = new TextBlock() { Text = fi.InstitutionName, FontStyle = FontStyles.Italic, Margin = new Thickness(10, 2, 10, 2) };
-                    Grid.SetRow(txt_fi, row);
-                    Grid.SetColumn(txt_fi, 0);
+                    }
+                    TextBlock txt_fi = Helpers.GridHelper.CreateTextInGrid(fi.InstitutionName, row, 0, false, HorizontalAlignment.Left, false, true, true);
                     NetWorthGrid.Children.Add(txt_fi);
 
                     foreach (Account acc in fi.Accounts)
@@ -149,27 +140,24 @@ namespace Budget_Model
                             if (!acctypes.Contains(acc.AccountType))
                             {
                                 if (first)
+                                {
                                     NetWorthGrid.ColumnDefinitions.Add(new ColumnDefinition());
-                                TextBlock txt_acc = new TextBlock() { Text = acc.AccountTypeDescription, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(10, 2, 10, 2) };
-                                Grid.SetRow(txt_acc, 0);
-                                Grid.SetColumn(txt_acc, acctypes.Count + 1);
-                                NetWorthGrid.Children.Add(txt_acc);
+                                }
+                                TextBlock txt_acc = Helpers.GridHelper.CreateTextInGrid(acc.AccountTypeDescription, 0, acctypes.Count + 1, false, HorizontalAlignment.Center, true, false, true);
                                 acctypes.Add(acc.AccountType);
                             }
                             double balance = statement.GetBalance(acc.AccountType, fi.ShortName);
-                            TextBlock txt_data = new TextBlock() { Text = string.Format("{0:C2}", balance), HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(10, 2, 10, 2)  };
-                            Grid.SetRow(txt_data, row);
-                            Grid.SetColumn(txt_data, acctypes.IndexOf(acc.AccountType) + 1);
+                            TextBlock txt_data = Helpers.GridHelper.CreateTextInGrid(string.Format("{0:C2}", balance), row, acctypes.IndexOf(acc.AccountType) + 1, false, HorizontalAlignment.Right, false, false, true);
                             NetWorthGrid.Children.Add(txt_data);
                         }
                     }
                     row++;
                 }
                 if (first)
+                {
                     NetWorthGrid.ColumnDefinitions.Add(new ColumnDefinition());
-                TextBlock txt_total_bank = new TextBlock() { Text = "Total", FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(10, 2, 10, 2) };
-                Grid.SetRow(txt_total_bank, 0);
-                Grid.SetColumn(txt_total_bank, acctypes.Count + 1);
+                }
+                TextBlock txt_total_bank = Helpers.GridHelper.CreateTextInGrid("Total", 0, acctypes.Count + 1, false, HorizontalAlignment.Center, true, false, true);
                 NetWorthGrid.Children.Add(txt_total_bank);
                 for (int r = 1; r < row; r++ )
                 {
@@ -178,19 +166,19 @@ namespace Budget_Model
                     {
                         TextBlock selected_txt = NetWorthGrid.Children.Cast<TextBlock>().Where(e => Grid.GetColumn(e) == c && Grid.GetRow(e) == r).FirstOrDefault();
                         if (selected_txt != null)
-                            amount += Convert.ToDouble(selected_txt.Text.Replace("$","").Replace(",",""));
+                        {
+                            amount += Convert.ToDouble(selected_txt.Text.Replace("$", "").Replace(",", ""));
+                        }
                     }
-                    txt_total_bank = new TextBlock() { Text = string.Format("{0:C2}", amount), FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(10, 2, 10, 2) };
-                    Grid.SetRow(txt_total_bank, r);
-                    Grid.SetColumn(txt_total_bank, acctypes.Count + 1);
+                    txt_total_bank = Helpers.GridHelper.CreateTextInGrid(string.Format("{0:C2}", amount), r, acctypes.Count + 1, false, HorizontalAlignment.Right, true, false, true);
                     NetWorthGrid.Children.Add(txt_total_bank);
                 }
 
                 if (first)
+                {
                     NetWorthGrid.RowDefinitions.Add(new RowDefinition());
-                TextBlock txt_total_accounttype = new TextBlock() { Text = "Total", FontWeight = FontWeights.Bold, Margin = new Thickness(10, 2, 10, 2) };
-                Grid.SetRow(txt_total_accounttype, row);
-                Grid.SetColumn(txt_total_accounttype, 0);
+                }
+                TextBlock txt_total_accounttype = Helpers.GridHelper.CreateTextInGrid("Total", row, 0, false, HorizontalAlignment.Left, true, false, true);
                 NetWorthGrid.Children.Add(txt_total_accounttype);
                 for (int c = 1; c <= acctypes.Count + 1; c++)
                 {
@@ -199,11 +187,11 @@ namespace Budget_Model
                     {
                         TextBlock selected_txt = NetWorthGrid.Children.Cast<TextBlock>().Where(e => Grid.GetColumn(e) == c && Grid.GetRow(e) == r).FirstOrDefault();
                         if (selected_txt != null)
+                        {
                             amount += Convert.ToDouble(selected_txt.Text.Replace("$", "").Replace(",", ""));
+                        }
                     }
-                    txt_total_accounttype = new TextBlock() { Text = string.Format("{0:C2}", amount), FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(10, 2, 10, 2) };
-                    Grid.SetRow(txt_total_accounttype, row);
-                    Grid.SetColumn(txt_total_accounttype, c);
+                    txt_total_accounttype = Helpers.GridHelper.CreateTextInGrid(string.Format("{0:C2}", amount), row, c, false, HorizontalAlignment.Right, true, false, true);
                     NetWorthGrid.Children.Add(txt_total_accounttype);
                 }
                 
@@ -261,7 +249,11 @@ namespace Budget_Model
         public SeriesCollection SeriesCollection_budget { get; set; }
         public string[] Labels { get; set; }
         public Func<double, string> Formatter { get; set; }
-        public void MakeExpenseChart(bool change = false)
+        public void MakeExpenseChart()
+        {
+            MakeExpenseChart(false);
+        }
+        public void MakeExpenseChart(bool change)
         {
             //bar chart
             MonthlyStatement statement = new MonthlyStatement();
@@ -316,19 +308,19 @@ namespace Budget_Model
         {
             if (date_month.IsLoaded)
             {
-                Task first_task = Task.Factory.StartNew(() =>
+                Task.Factory.StartNew(() =>
                 {
                     GetAlert();
                 });
-                Task second_task = Task.Factory.StartNew(() =>
+                Task.Factory.StartNew(() =>
                 {
                     FillDataGrid(null);
                 });
-                Task third_task = Task.Factory.StartNew(() =>
+                Task.Factory.StartNew(() =>
                 {
                     GetStatementItems();
                 });
-                Task fourth_task = Task.Factory.StartNew(() =>
+                Task.Factory.StartNew(() =>
                 {
                     MakeExpenseChart(true);
                 });
@@ -355,5 +347,9 @@ namespace Budget_Model
             NavigationService.Navigate(new Uri("DataDefinitions.xaml", UriKind.Relative));
         }
 
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            (this.Parent as Window).WindowState = WindowState.Maximized;
+        }
     }
 }

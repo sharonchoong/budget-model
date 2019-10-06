@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 
 namespace Budget_Model.Helpers
 {
-    class APIGet
+    static class APIGet
     {
         public static string GetAPIdata(string url)
         {
             using (var httpClient = new HttpClient())
             {
-                //httpClient.DefaultRequestHeaders.Add(RequestConstants.UserAgent, RequestConstants.UserAgentValue);
                 ServicePointManager.Expect100Continue = true;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 

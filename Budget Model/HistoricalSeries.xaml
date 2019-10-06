@@ -7,7 +7,7 @@
       xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
       mc:Ignorable="d" 
       d:DesignHeight="300" d:DesignWidth="300"
-      Title="Historical Series" MinHeight="900" MinWidth="900">
+      Title="Historical Series" MinHeight="650" MinWidth="800">
 
     <Grid x:Name="LayoutRoot" Margin="21,10,18,19">
         <Grid.ColumnDefinitions>
@@ -17,9 +17,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="1*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -43,7 +43,7 @@
         <TextBlock Grid.Row="1" Grid.Column="0" TextDecorations="Underline" Name="NetWorthChartTitle"
                Text="Monthly Net Worth Over Time" HorizontalAlignment="Left" VerticalAlignment="Center" />
 
-        <lvc:CartesianChart x:Name="NetWorthChart" Series="{Binding Series_NetWorth}" Grid.Row="2" Grid.Column="0" LegendLocation="Top" MinHeight="250" Margin="30,0,30,20">
+        <lvc:CartesianChart x:Name="NetWorthChart" Series="{Binding Series_NetWorth}" Grid.Row="2" Grid.Column="0" LegendLocation="Top" Margin="30,0,30,20">
             <lvc:CartesianChart.AxisX>
                 <lvc:Axis  LabelFormatter="{Binding NetWorthFormatter}" FontSize="12" LabelsRotation="270" Foreground="Black">
                     <lvc:Axis.Separator>
@@ -59,7 +59,7 @@
         <TextBlock Grid.Row="1" Grid.Column="1" TextDecorations="Underline" Name="NetSavingsChartTitle"
                Text="Monthly Net Savings excluding Miscellaneous" HorizontalAlignment="Left" VerticalAlignment="Center" />
 
-        <lvc:CartesianChart x:Name="SavingsChart" Series="{Binding Series_Savings}"  Grid.Row="2" Grid.Column="1" LegendLocation="Top" MinHeight="250" Margin="30,0,30,20">
+        <lvc:CartesianChart x:Name="SavingsChart" Series="{Binding Series_Savings}"  Grid.Row="2" Grid.Column="1" LegendLocation="Top" Margin="30,0,30,20">
             <lvc:CartesianChart.AxisX>
                 <lvc:Axis LabelFormatter="{Binding MonthFormatter}" FontSize="12" LabelsRotation="270" Foreground="Black">
                     <lvc:Axis.Separator>
@@ -78,7 +78,7 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="210,0,0,0" TextDecorations="Underline" Name="CategoryChartTitle"
                Text=" By Month" HorizontalAlignment="Left" VerticalAlignment="Center" />
 
-        <lvc:CartesianChart x:Name="CategoryChart" Series="{Binding Series_Category}" Grid.Row="4" Grid.Column="0" LegendLocation="Top" MinHeight="250" Margin="30,0,30,10">
+        <lvc:CartesianChart x:Name="CategoryChart" Series="{Binding Series_Category}" Grid.Row="4" Grid.Column="0" LegendLocation="Top" Margin="30,0,30,10">
             <lvc:CartesianChart.AxisX>
                 <lvc:Axis  LabelFormatter="{Binding MonthFormatter}" FontSize="12" LabelsRotation="270" Foreground="Black" >
                     <lvc:Axis.Separator>

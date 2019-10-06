@@ -127,7 +127,7 @@ namespace Budget_Model
                     string keyword = row_items.Row.ItemArray[6].ToString();
                     ComboBox cb = e.EditingElement as ComboBox;
                     string t = Convert.ToString(cb.SelectedItem);
-                    
+
                     new_category.Category = t;
                     new_category.Keyword = keyword;
                     new_category.UpdateDefinition(keyword, row_items.Row.ItemArray[6] != DBNull.Value && !string.IsNullOrWhiteSpace(t));
@@ -140,7 +140,7 @@ namespace Budget_Model
                     string keyword = row_items.Row.ItemArray[6].ToString();
                     ComboBox cb = e.EditingElement as ComboBox;
                     string t = Convert.ToString(cb.SelectedItem);
-                    
+
                     int id = Convert.ToInt32(row_items.Row.ItemArray[0]);
                     new_category.CustomCategory = t;
                     new_category.CategoryOverride(id, !string.IsNullOrWhiteSpace(t));
@@ -242,7 +242,7 @@ namespace Budget_Model
         {
             UpdateDataGrid();
         }
-        
+
         public void UpdateDataGrid()
         {
             ComboBoxItem selected_date = (ComboBoxItem)(comboDate.SelectedItem);
@@ -264,6 +264,8 @@ namespace Budget_Model
                                 subquery_date = " WHERE date between DATE('now', 'start of month', '-12 month') AND DATE('now') OR category IS NULL OR totalCount > 1 "; break;
                             case "Last 2 Years":
                                 subquery_date = " WHERE date between DATE('now', 'start of month', '-24 month') AND DATE('now') OR category IS NULL OR totalCount > 1 "; break;
+                            default:
+                                break;
                         }
 
                         string qry = "select *, COALESCE(category_presort, 1) as category_sort from Statements ";
@@ -353,6 +355,6 @@ namespace Budget_Model
             }
         }
 
-        
+
     }
 }

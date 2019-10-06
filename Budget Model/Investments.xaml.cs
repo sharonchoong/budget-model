@@ -43,29 +43,12 @@ namespace Budget_Model
         public Investments()
         {
             InitializeComponent();
-
-            Holder holder = new Holder();
-            HoldersItems = holder.HolderCollection(true);
-            comboFor.DataContext = this;
-            comboFor.SelectedIndex = 0;
-
-            Tuple<DateTime, DateTime> dates = BankTransaction.GetDates("Home");
+            
+            HoldersItems = Helpers.Initializer.SetHolders(comboFor, this);
+            
             date_month_to.SelectedDateChanged -= SelectionChanged;
             date_month_from.SelectedDateChanged -= SelectionChanged;
-            if (dates != null)
-            {
-                date_month_to.SelectedDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(1).AddDays(-1);
-                date_month_to.DisplayDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(1).AddDays(-1);
-                date_month_from.SelectedDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(-11);
-                date_month_from.DisplayDate = new DateTime(dates.Item2.Year, dates.Item2.Month, 1).AddMonths(-11);
-            }
-            else
-            {
-                date_month_to.SelectedDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddDays(-1);
-                date_month_to.DisplayDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddDays(-1);
-                date_month_from.SelectedDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-11).AddDays(-1);
-                date_month_from.DisplayDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-11).AddDays(-1);
-            }
+            Helpers.Initializer.SetDates(date_month_from, date_month_to);
             date_month_to.SelectedDateChanged += SelectionChanged;
             date_month_from.SelectedDateChanged += SelectionChanged;
 
@@ -112,9 +95,13 @@ namespace Budget_Model
                     if (row != null)
                     {
                         if (rowview["category_sort"].ToString() != "0")
+                        {
                             row.Background = new SolidColorBrush(Colors.White);
+                        }
                         else
+                        {
                             row.Background = new SolidColorBrush(Colors.DarkSalmon);
+                        }
                     }
                 }
             }
@@ -163,27 +150,34 @@ namespace Budget_Model
         public void FillDataGrid(string date)
         {
             //filling datagrid 
-            DataTable dt3 = new DataTable();
             string selected_person = "";
             DateTime date_selected = new DateTime();
             Dispatcher.Invoke(() =>
             {
                 selected_person = HoldersItems.Where(r => r.IsChecked == true).Select(x => x.HolderName).First();
                 if (date == null)
+                {
                     date_selected = Convert.ToDateTime(date_month_to.SelectedDate);
+                }
                 else
+                {
                     DateTime.TryParseExact(date, "MMM yy", new System.Globalization.CultureInfo("en-US"), System.Globalization.DateTimeStyles.None, out date_selected);
+                }
             });
-            dt3 = BrokerageAsset.GetMonthInvestments(selected_person, date_selected);
+            DataTable dt = BrokerageAsset.GetMonthInvestments(selected_person, date_selected);
             Dispatcher.Invoke(() =>
             {
-                if (dt3.Rows.Count > 0)
-                    date_grid.Text = "Date: " + dt3.Rows[0].Field<DateTime>("date").ToShortDateString();
+                if (dt.Rows.Count > 0)
+                {
+                    date_grid.Text = "Date: " + dt.Rows[0].Field<DateTime>("date").ToShortDateString();
+                }
                 else
+                {
                     date_grid.Text = "";
+                }
                 DataGridInvestments.CommitEdit();
                 DataGridInvestments.CommitEdit();
-                DataGridInvestments.DataContext = dt3;
+                DataGridInvestments.DataContext = dt;
             });
         }
 
@@ -195,7 +189,6 @@ namespace Budget_Model
                 isManualEditCommit = true;
                 DataGridRow row = e.Row;
                 DataRowView row_items = (DataRowView)row.Item;
-                int row_index = row.GetIndex();
                 if (e.Column.Header.ToString() == "Category")
                 {
                     ComboBox cb = e.EditingElement as ComboBox;
@@ -217,9 +210,13 @@ namespace Budget_Model
         
         public SeriesCollection Series_Gains { get; set; } = new SeriesCollection();
 
-        public void Gains_Chart(bool change = false)
+        public void Gains_Chart()
         {
-            DataTable dt = new DataTable();
+            Gains_Chart(false);
+        }
+
+        public void Gains_Chart(bool change)
+        {
             DateTime from_month = new DateTime();
             DateTime to_month = new DateTime();
             string datatype = "";
@@ -232,8 +229,10 @@ namespace Budget_Model
             gainformatter = "C0";
 
             if (datatype == "Percentage")
+            {
                 gainformatter = "P2";
-            dt = InvestmentChange.GetHistoricalGains(datatype, from_month, to_month);
+            }
+            DataTable dt = InvestmentChange.GetHistoricalGains(datatype, from_month, to_month);
 
             Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, (Action)(() =>
             {
@@ -242,7 +241,7 @@ namespace Budget_Model
                 {
                     if (dt.AsEnumerable().Any(r => r["holder"].ToString() == holder.HolderName))
                     {
-                        Series_Gains.Add(new LineSeries()
+                        Series_Gains.Add(new LineSeries
                         {
                             Values = new ChartValues<DateModel>(dt.AsEnumerable().Where(r => r["holder"].ToString() == holder.HolderName)
                             .Select(r => new DateModel { DateTime = r.Field<DateTime>("date"), Value = r.Field<double?>("amount") ?? 0 })),
@@ -261,9 +260,12 @@ namespace Budget_Model
         }
 
         public SeriesCollection StackedSeriesCollection { get; set; } = new SeriesCollection();
-        public void Stacked_Chart(bool change = false)
+        public void Stacked_Chart()
         {
-            DataTable dt = new DataTable();
+            Stacked_Chart(false);
+        }
+        public void Stacked_Chart(bool change)
+        {
             DateTime from_month = new DateTime();
             DateTime to_month = new DateTime();
             string selected_person = "";
@@ -275,7 +277,7 @@ namespace Budget_Model
                 StackedSeriesCollection.Clear();
             });
 
-            dt = BrokerageAsset.GetHistoricalInvestments(selected_person, null, null, from_month, to_month);
+            DataTable dt = BrokerageAsset.GetHistoricalInvestments(selected_person, null, null, from_month, to_month);
 
             IEnumerable<string> selectcategories = InvestmentCategory.Getcategories();
             Brush[] colors = { Brushes.DarkGreen, Brushes.ForestGreen, Brushes.Gainsboro, Brushes.Gold, Brushes.DarkBlue };
@@ -314,9 +316,20 @@ namespace Budget_Model
         }
 
         public SeriesCollection StackedSeriesCollection2 { get; set; } = new SeriesCollection();
-        public void StackedAsset_Chart(bool change = false, string category = "US Equity")
+        public void StackedAsset_Chart()
         {
-            DataTable dt = new DataTable();
+            StackedAsset_Chart(false, "US Equity");
+        }
+        public void StackedAsset_Chart(bool change)
+        {
+            StackedAsset_Chart(change, "US Equity");
+        }
+        public void StackedAsset_Chart(string category)
+        {
+            StackedAsset_Chart(false, category);
+        }
+        public void StackedAsset_Chart(bool change, string category)
+        {
             DateTime from_month = new DateTime();
             DateTime to_month = new DateTime();
             string selected_person = "";
@@ -332,8 +345,8 @@ namespace Budget_Model
                 StackedSeriesCollection2.Clear();
             });
 
-            string asset_column = (new string[] { "Treasuries", "Bonds", "CDs" }.Contains(category) ? "asset_description" : "asset_symbol");
-            dt = BrokerageAsset.GetHistoricalInvestments(selected_person, category, asset_column, from_month, to_month);
+            string asset_column = (new [] { "Treasuries", "Bonds", "CDs" }.Contains(category) ? "asset_description" : "asset_symbol");
+            DataTable dt = BrokerageAsset.GetHistoricalInvestments(selected_person, category, asset_column, from_month, to_month);
 
             string[] assets = dt.AsEnumerable().Select(r => r[asset_column].ToString()).Distinct()
                 .OrderBy(s => (regex.IsMatch(s) ? Convert.ToDateTime(regex.Match(s).Value).ToString("yyyyMMdd") : s))
@@ -341,14 +354,20 @@ namespace Budget_Model
             Dispatcher.Invoke(() =>
             {
                 if (assets.Length > 8)
+                {
                     chartStackedAsset.LegendLocation = LegendLocation.None;
+                }
                 else
+                {
                     chartStackedAsset.LegendLocation = LegendLocation.Top;
+                }
+                    
                 foreach (string asset in assets)
                 {
                     ChartValues<DateModel> chartvalues = new ChartValues<DateModel>(dt.AsEnumerable().Where(r => r[asset_column].ToString() == asset)
                             .Select(r => new DateModel { DateTime = r.Field<DateTime>("date"), Value = r.Field<double?>("ending_mkt_value") ?? 0 }));
                     if (chartvalues.Count != 0)
+                    {
                         StackedSeriesCollection2.Add(new StackedColumnSeries
                         {
                             Values = chartvalues,
@@ -359,6 +378,7 @@ namespace Budget_Model
                             LabelsPosition = BarLabelPosition.Perpendicular,
                             Foreground = System.Windows.Media.Brushes.Black
                         });
+                    }
                 }
             });
 
@@ -372,13 +392,25 @@ namespace Budget_Model
         }
 
         public SeriesCollection PriceSeriesCollection { get; set; } = new SeriesCollection();
-        public void PriceAsset_Chart(bool change = false, string asset = null)
+        public void PriceAsset_Chart()
         {
-            if (asset == null)
+            PriceAsset_Chart(false, null);
+        }
+        public void PriceAsset_Chart(bool change)
+        {
+            PriceAsset_Chart(change, null);
+        }
+        public void PriceAsset_Chart(string asset)
+        {
+            PriceAsset_Chart(false, asset);
+        }
+        public void PriceAsset_Chart(bool change, string _asset)
+        {
+            string asset = _asset;
+            if (_asset == null)
             {
                 asset = BrokerageAsset.GetFirstAsset();
             }
-            DataTable dt = new DataTable();
             DateTime from_month = new DateTime();
             DateTime to_month = new DateTime();
             string selected_person = "";
@@ -396,7 +428,7 @@ namespace Budget_Model
             ChartValues<DateModel> chartprices1 = new ChartValues<DateModel>();
             ChartValues<DateModel> chartprices2 = new ChartValues<DateModel>();
             ChartValues<DateModel> chartprices10 = new ChartValues<DateModel>();
-            if (!new string[] { "Treasuries", "Bonds", "CDs" }.Contains(asset))
+            if (!new [] { "Treasuries", "Bonds", "CDs" }.Contains(asset))
             {
                 order_history_formatter = "C2";
                 string alphav_key = System.Web.Configuration.WebConfigurationManager.AppSettings["alphav_key"];
@@ -409,7 +441,7 @@ namespace Budget_Model
                         url_alphav_priceadj = "https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY_ADJUSTED&symbol=" + asset + "&apikey=" + alphav_key;
                         results_timeseries = "Weekly Adjusted Time Series";
                     }
-                    JObject json_results = (JObject)JsonConvert.DeserializeObject(GetAPIdata(url_alphav_priceadj));
+                    JObject json_results = (JObject)JsonConvert.DeserializeObject(Helpers.APIGet.GetAPIdata(url_alphav_priceadj));
                     if (json_results.First.ToString().Contains("Error Message"))
                     {
                         Dispatcher.Invoke(() =>
@@ -447,7 +479,7 @@ namespace Budget_Model
                 order_history_formatter = "P2";
                 string url_yields = "https://data.treasury.gov/feed.svc/DailyTreasuryYieldCurveRateData?$filter=year(NEW_DATE)%20gt%20" + (from_month.Year - 1);
                 XmlDocument doc = new XmlDocument();
-                doc.LoadXml(GetAPIdata(url_yields));
+                doc.LoadXml(Helpers.APIGet.GetAPIdata(url_yields));
                 var nsmgr = new XmlNamespaceManager(doc.NameTable);
                 nsmgr.AddNamespace("a", "http://www.w3.org/2005/Atom");
                 nsmgr.AddNamespace("m", "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata");
@@ -456,7 +488,9 @@ namespace Budget_Model
                 {
                     DateTime entry_date = Convert.ToDateTime(node.SelectSingleNode("m:properties/d:NEW_DATE", nsmgr).InnerText);
                     if ((to_month - from_month).TotalDays > 95 && entry_date.DayOfWeek != DayOfWeek.Friday)
+                    {
                         continue;
+                    }
                     
                     if (entry_date >= from_month && entry_date <= to_month)
                     {
@@ -469,24 +503,24 @@ namespace Budget_Model
             }
 
             //database of past investment transactions
-            string variable_sql = (new string[] { "Treasuries", "Bonds", "CDs" }.Contains(asset) ? "yield_to_maturity" : "price");
-            string variable_label = (new string[] { "Treasuries", "Bonds", "CDs" }.Contains(asset) ? "Yield" : "Price");
+            string variable_sql = (new [] { "Treasuries", "Bonds", "CDs" }.Contains(asset) ? "yield_to_maturity" : "price");
+            string variable_label = (new [] { "Treasuries", "Bonds", "CDs" }.Contains(asset) ? "Yield" : "Price");
             Dispatcher.Invoke(() =>
             {
                 gridstats.Children.Clear();
 
                 if (chartprices.Count != 0)
                 {
-                    gridstats.Children.Add(CreateTextInGrid("Latest " + variable_label + " (" + chartprices.AsEnumerable().OrderBy(r => r.DateTime).Last().DateTime.ToShortDateString()
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("Latest " + variable_label + " (" + chartprices.AsEnumerable().OrderBy(r => r.DateTime).Last().DateTime.ToShortDateString()
                         + "):", 2, 0));
-                    gridstats.Children.Add(CreateTextInGrid("Average " + variable_label + ":", 3, 0));
-                    gridstats.Children.Add(CreateTextInGrid("Minimum " + variable_label + ":", 4, 0));
-                    gridstats.Children.Add(CreateTextInGrid("Maximum " + variable_label + ":", 5, 0));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("Average " + variable_label + ":", 3, 0));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("Minimum " + variable_label + ":", 4, 0));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("Maximum " + variable_label + ":", 5, 0));
 
-                    gridstats.Children.Add(CreateTextInGrid(chartprices.AsEnumerable().OrderBy(r => r.DateTime).Last().Value.ToString(order_history_formatter), 2, 1));
-                    gridstats.Children.Add(CreateTextInGrid(chartprices.AsEnumerable().Average(r => r.Value).ToString(order_history_formatter), 3, 1));
-                    gridstats.Children.Add(CreateTextInGrid(chartprices.AsEnumerable().Min(r => r.Value).ToString(order_history_formatter), 4, 1));
-                    gridstats.Children.Add(CreateTextInGrid(chartprices.AsEnumerable().Max(r => r.Value).ToString(order_history_formatter), 5, 1));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices.AsEnumerable().OrderBy(r => r.DateTime).Last().Value.ToString(order_history_formatter), 2, 1));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices.AsEnumerable().Average(r => r.Value).ToString(order_history_formatter), 3, 1));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices.AsEnumerable().Min(r => r.Value).ToString(order_history_formatter), 4, 1));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices.AsEnumerable().Max(r => r.Value).ToString(order_history_formatter), 5, 1));
 
                     PriceSeriesCollection.Add(new LineSeries
                     {
@@ -499,28 +533,28 @@ namespace Budget_Model
                     
                     if (new string[] { "Treasuries", "Bonds", "CDs" }.Contains(asset))
                     {
-                        gridstats.Children.Add(CreateTextInGrid("3-Month:", 1, 1));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("3-Month:", 1, 1));
 
-                        gridstats.Children.Add(CreateTextInGrid("1-Year:", 1, 2));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("1-Year:", 1, 2));
                         
-                        gridstats.Children.Add(CreateTextInGrid(chartprices1.AsEnumerable().OrderBy(r => r.DateTime).Last().Value.ToString(order_history_formatter), 2, 2));
-                        gridstats.Children.Add(CreateTextInGrid(chartprices1.AsEnumerable().Average(r => r.Value).ToString(order_history_formatter), 3, 2));
-                        gridstats.Children.Add(CreateTextInGrid(chartprices1.AsEnumerable().Min(r => r.Value).ToString(order_history_formatter), 4, 2));
-                        gridstats.Children.Add(CreateTextInGrid(chartprices1.AsEnumerable().Max(r => r.Value).ToString(order_history_formatter), 5, 2));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices1.AsEnumerable().OrderBy(r => r.DateTime).Last().Value.ToString(order_history_formatter), 2, 2));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices1.AsEnumerable().Average(r => r.Value).ToString(order_history_formatter), 3, 2));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices1.AsEnumerable().Min(r => r.Value).ToString(order_history_formatter), 4, 2));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices1.AsEnumerable().Max(r => r.Value).ToString(order_history_formatter), 5, 2));
 
-                        gridstats.Children.Add(CreateTextInGrid("2-Year:", 1, 3));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("2-Year:", 1, 3));
 
-                        gridstats.Children.Add(CreateTextInGrid(chartprices2.AsEnumerable().OrderBy(r => r.DateTime).Last().Value.ToString(order_history_formatter), 2, 3));
-                        gridstats.Children.Add(CreateTextInGrid(chartprices2.AsEnumerable().Average(r => r.Value).ToString(order_history_formatter), 3, 3));
-                        gridstats.Children.Add(CreateTextInGrid(chartprices2.AsEnumerable().Min(r => r.Value).ToString(order_history_formatter), 4, 3));
-                        gridstats.Children.Add(CreateTextInGrid(chartprices2.AsEnumerable().Max(r => r.Value).ToString(order_history_formatter), 5, 3));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices2.AsEnumerable().OrderBy(r => r.DateTime).Last().Value.ToString(order_history_formatter), 2, 3));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices2.AsEnumerable().Average(r => r.Value).ToString(order_history_formatter), 3, 3));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices2.AsEnumerable().Min(r => r.Value).ToString(order_history_formatter), 4, 3));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices2.AsEnumerable().Max(r => r.Value).ToString(order_history_formatter), 5, 3));
 
-                        gridstats.Children.Add(CreateTextInGrid("10-Year:", 1, 4));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("10-Year:", 1, 4));
 
-                        gridstats.Children.Add(CreateTextInGrid(chartprices10.AsEnumerable().OrderBy(r => r.DateTime).Last().Value.ToString(order_history_formatter), 2, 4));
-                        gridstats.Children.Add(CreateTextInGrid(chartprices10.AsEnumerable().Average(r => r.Value).ToString(order_history_formatter), 3, 4));
-                        gridstats.Children.Add(CreateTextInGrid(chartprices10.AsEnumerable().Min(r => r.Value).ToString(order_history_formatter), 4, 4));
-                        gridstats.Children.Add(CreateTextInGrid(chartprices10.AsEnumerable().Max(r => r.Value).ToString(order_history_formatter), 5, 4));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices10.AsEnumerable().OrderBy(r => r.DateTime).Last().Value.ToString(order_history_formatter), 2, 4));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices10.AsEnumerable().Average(r => r.Value).ToString(order_history_formatter), 3, 4));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices10.AsEnumerable().Min(r => r.Value).ToString(order_history_formatter), 4, 4));
+                        gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(chartprices10.AsEnumerable().Max(r => r.Value).ToString(order_history_formatter), 5, 4));
 
                         PriceSeriesCollection.Add(new LineSeries
                         {
@@ -549,7 +583,7 @@ namespace Budget_Model
 
             Dispatcher.Invoke(() => 
             {
-                dt = BrokerageTransaction.GetHistoricalTransactions(asset, selected_person, from_month, to_month);
+                DataTable dt = BrokerageTransaction.GetHistoricalTransactions(asset, selected_person, from_month, to_month);
                 if (dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("bought", StringComparison.OrdinalIgnoreCase) >= 0).Count() != 0 ||
                     dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("buy", StringComparison.OrdinalIgnoreCase) >= 0).Count() != 0)
                 {
@@ -560,8 +594,8 @@ namespace Budget_Model
                             || r["transaction_description"].ToString().IndexOf("buy", StringComparison.OrdinalIgnoreCase) >= 0)
                             .Select(r => new DateModel { DateTime = r.Field<DateTime>("date"), Value = r.Field<double?>(variable_sql) ?? 0 }))
                     });
-                    gridstats.Children.Add(CreateTextInGrid("Average " + variable_label + " Bought:", 0, 0));
-                    gridstats.Children.Add(CreateTextInGrid(dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("bought", StringComparison.OrdinalIgnoreCase) >= 0 
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("Average " + variable_label + " Bought:", 0, 0));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("bought", StringComparison.OrdinalIgnoreCase) >= 0 
                         || r["transaction_description"].ToString().IndexOf("buy", StringComparison.OrdinalIgnoreCase) >= 0)
                         .Average(r => r.Field<double>(variable_sql)).ToString(order_history_formatter), 0, 1));
                 }
@@ -575,30 +609,30 @@ namespace Budget_Model
                             || r["transaction_description"].ToString().IndexOf("sell", StringComparison.OrdinalIgnoreCase) >= 0)
                             .Select(r => new DateModel { DateTime = r.Field<DateTime>("date"), Value = r.Field<double?>(variable_sql) ?? 0 }))
                     });
-                    gridstats.Children.Add(CreateTextInGrid("Average " + variable_label + " Sold:", 0, 2));
-                    gridstats.Children.Add(CreateTextInGrid(dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("sold", StringComparison.OrdinalIgnoreCase) >= 0 
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("Average " + variable_label + " Sold:", 0, 2));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("sold", StringComparison.OrdinalIgnoreCase) >= 0 
                         || r["transaction_description"].ToString().IndexOf("sell", StringComparison.OrdinalIgnoreCase) >= 0)
                         .Average(r => r.Field<double>(variable_sql)).ToString(order_history_formatter), 0, 3));
                 }
-                label_assetclassprice.Text = asset + ": Order History and " + (new string[] { "Treasuries", "Bonds", "CDs" }.Contains(asset) ? "Yields" : "Price (Adjusted For Splits and Dividends)");
+                label_assetclassprice.Text = asset + ": Order History and " + (new [] { "Treasuries", "Bonds", "CDs" }.Contains(asset) ? "Yields" : "Price (Adjusted For Splits and Dividends)");
                 label_secstats.Text = "Statistics for " + asset;
                 PriceChart.DataContext = this;
             });
         }
 
-        private void ClickFillData(object sender, ChartPoint p)
+        public void ClickFillData(object sender, ChartPoint p)
         {
             FillDataGrid(MonthFormatter(p.X));
         }
-        public string category_clicked = "";
-        private void ClickCategoryAssets(object sender, ChartPoint p)
+        private string category_clicked = "";
+        public void ClickCategoryAssets(object sender, ChartPoint p)
         {
             FillDataGrid(MonthFormatter(p.X));
             category_clicked = p.SeriesView.Title;
             Task.Factory.StartNew(() => {
                 StackedAsset_Chart(true, category_clicked);
             });
-            if (new string[] { "Treasuries", "Bonds", "CDs" }.Contains(category_clicked))
+            if (new [] { "Treasuries", "Bonds", "CDs" }.Contains(category_clicked))
             {
                 Task.Factory.StartNew(() => {
                     PriceAsset_Chart(true, category_clicked);
@@ -606,41 +640,16 @@ namespace Budget_Model
             }
         }
 
-        private void ClickAsset(object sender, ChartPoint p)
+        public void ClickAsset(object sender, ChartPoint p)
         {
             FillDataGrid(MonthFormatter(p.X));
             string asset = p.SeriesView.Title;
-            if (category_clicked != "Cash" && !new string[] { "Treasuries", "Bonds", "CDs" }.Contains(category_clicked))
+            if (category_clicked != "Cash" && !new [] { "Treasuries", "Bonds", "CDs" }.Contains(category_clicked))
             {
                 Task.Factory.StartNew(() => {
                     PriceAsset_Chart(true, asset);
                 });
             }
-        }
-
-        public string GetAPIdata(string url)
-        {
-            using (var httpClient = new HttpClient())
-            {
-                //httpClient.DefaultRequestHeaders.Add(RequestConstants.UserAgent, RequestConstants.UserAgentValue);
-                ServicePointManager.Expect100Continue = true;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-                var response = httpClient.GetStringAsync(new Uri(url)).Result;
-
-                return response;
-            }
-        }
-
-        public TextBlock CreateTextInGrid(string text, int row, int column, bool vertical_align = false)
-        {
-            TextBlock txt = new TextBlock();
-            txt.Text = text;
-            Grid.SetRow(txt, row);
-            Grid.SetColumn(txt, column);
-            if (vertical_align)
-                txt.VerticalAlignment = VerticalAlignment.Bottom;
-            return txt;
         }
     }
 }

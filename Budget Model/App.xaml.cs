@@ -20,7 +20,7 @@ namespace Budget_Model
     {
     }
 
-    public class DatePickerCalendar
+    public static class DatePickerCalendar
     {
         public static readonly DependencyProperty IsMonthYearProperty =
             DependencyProperty.RegisterAttached("IsMonthYear", typeof(bool), typeof(DatePickerCalendar),
@@ -49,7 +49,7 @@ namespace Budget_Model
         private static void SetCalendarEventHandlers(DatePicker datePicker, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue == e.OldValue)
-                return;
+            { return;  }
 
             if ((bool)e.NewValue)
             {
@@ -84,7 +84,8 @@ namespace Budget_Model
         {
             var calendar = (Calendar)sender;
             if (calendar.DisplayMode != CalendarMode.Month)
-                return;
+            { return;  }
+                
 
             calendar.SelectedDate = GetSelectedCalendarDate(calendar.DisplayDate);
 
@@ -103,14 +104,18 @@ namespace Budget_Model
         {
             var parent = (FrameworkElement)child.Parent;
             if (parent.Name == "PART_Root")
+            {
                 return (DatePicker)parent.TemplatedParent;
+            }
             return GetCalendarsDatePicker(parent);
         }
 
         private static DateTime? GetSelectedCalendarDate(DateTime? selectedDate)
         {
             if (!selectedDate.HasValue)
+            {
                 return null;
+            }
             return new DateTime(selectedDate.Value.Year, selectedDate.Value.Month, DateTime.DaysInMonth(selectedDate.Value.Year, selectedDate.Value.Month));
         }
 
@@ -168,7 +173,9 @@ namespace Budget_Model
         private static void TextBoxOnPreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Return)
+            {
                 return;
+            }
 
             /* DatePicker subscribes to its TextBox's KeyDown event to set its SelectedDate if Key.Return was
              * pressed. When this happens its text will be the result of its internal date parsing until it
@@ -224,93 +231,14 @@ namespace Budget_Model
                                                       System.Globalization.DateTimeStyles.None, out date);
 
                 if (!canParse)
+                {
                     canParse = DateTime.TryParse(dateStr, System.Globalization.CultureInfo.CurrentCulture, System.Globalization.DateTimeStyles.None, out date);
+                }
 
                 return canParse ? date : datePicker.SelectedDate;
             }
         }
     }
 
-    public class xirr
-    {
-        public const double tol = 0.001;
-        public delegate double fx(double x);
-
-        public static fx composeFunctions(fx f1, fx f2)
-        {
-            return (double x) => f1(x) + f2(x);
-        }
-
-        public static fx f_xirr(double p, double dt, double dt0)
-        {
-            return (double x) => p * Math.Pow((1.0 + x), ((dt0 - dt) / 365.0));
-        }
-
-        public static fx df_xirr(double p, double dt, double dt0)
-        {
-            return (double x) => (1.0 / 365.0) * (dt0 - dt) * p * Math.Pow((x + 1.0), (((dt0 - dt) / 365.0) - 1.0));
-        }
-
-        public static fx total_f_xirr(double[] payments, double[] days)
-        {
-            fx resf = (double x) => 0.0;
-
-            for (int i = 0; i < payments.Length; i++)
-            {
-                resf = composeFunctions(resf, f_xirr(payments[i], days[i], days[0]));
-            }
-
-            return resf;
-        }
-
-        public static fx total_df_xirr(double[] payments, double[] days)
-        {
-            fx resf = (double x) => 0.0;
-
-            for (int i = 0; i < payments.Length; i++)
-            {
-                resf = composeFunctions(resf, df_xirr(payments[i], days[i], days[0]));
-            }
-
-            return resf;
-        }
-
-        public static double Newtons_method(double guess, fx f, fx df)
-        {
-            double x0 = guess;
-            double x1 = 0.0;
-            double err = 1e+100;
-
-            while (err > tol)
-            {
-                x1 = x0 - f(x0) / df(x0);
-                err = Math.Abs(x1 - x0);
-                x0 = x1;
-            }
-
-            return x0;
-        }
-
-        public static double compute_yield_to_maturity(DateTime maturity, DateTime settlement, double price_paid, double coupon_rate, double par, double guess = 0.1)
-        {
-            int nequalsemianns = (int)Math.Ceiling((maturity - settlement).TotalDays / (365.0 / 2.0));
-            List<double> payments = new List<double>();
-            List<double> datesAsDoubles = new List<double>();
-            payments.Add(price_paid);
-            datesAsDoubles.Add((settlement - DateTime.MinValue).TotalDays);
-            for (int i = 1; i < nequalsemianns; i++)
-            {
-                var totalDays = (maturity.AddMonths(-6 * i) - DateTime.MinValue).TotalDays;
-                datesAsDoubles.Add(totalDays);
-                payments.Add(coupon_rate / 2 * par);
-            }
-            payments.Add(par + (coupon_rate / 2 * par));
-            datesAsDoubles.Add((maturity - DateTime.MinValue).TotalDays);
-
-            double yield = Newtons_method(guess,
-                    total_f_xirr(payments.ToArray(), datesAsDoubles.ToArray()),
-                    total_df_xirr(payments.ToArray(), datesAsDoubles.ToArray()));
-            return yield;
-        }
-    }
+    
 }

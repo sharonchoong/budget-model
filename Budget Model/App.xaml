@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Budget_Model"
-             StartupUri="MainWindow.xaml">
+             StartupUri="BudgetStatement.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <Style x:Key="RightAlignment" TargetType="DataGridCell">

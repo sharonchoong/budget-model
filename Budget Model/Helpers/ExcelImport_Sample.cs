@@ -12,9 +12,9 @@ using System.Windows;
 
 namespace Budget_Model.Helpers
 {
-    class ExcelImport
+    static class ExcelImport
     {
-        public static void ImportFromExcel(string filename, ReportFormat bank, string holder, DateTime? date_statement )
+        public static void ImportFromExcel(string filename, ReportFormat bank, string holder, DateTime? date_statement)
         {
             int count_entries = 0;
             using (var fs = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -22,7 +22,7 @@ namespace Budget_Model.Helpers
                 using (StreamReader sr = new StreamReader(fs))
                 {
                     var csv = new CsvReader(sr);
-                    
+
                     while (csv.Read())
                     {
                         DateTime dateField;
@@ -53,6 +53,8 @@ namespace Budget_Model.Helpers
                                         new_asset.Description = csv.GetField(1);
                                         new_asset.Value = Convert.ToDouble(csv.GetField(3));
                                         break;
+                                    default:
+                                        break;
                                 }
                                 new_asset.Holder = holder;
                                 new_asset.Bank = bank.Account.FinancialInstitution.ShortName;
@@ -75,6 +77,8 @@ namespace Budget_Model.Helpers
                                             new_transaction = new BrokerageTransaction(Convert.ToDouble(quantity_price[1].Replace(",", "")), Convert.ToDouble(quantity_price[0]), csv.GetField(2));
                                             description = csv.GetField(1);
                                             break;
+                                        default:
+                                            break;
                                     }
                                 }
                                 else
@@ -85,6 +89,8 @@ namespace Budget_Model.Helpers
                                         case "B1 Default Format":
                                             csv.TryGetField(1, out amount);
                                             description = csv.GetField(2);
+                                            break;
+                                        default:
                                             break;
                                     }
                                     new_transaction.Amount = amount;
