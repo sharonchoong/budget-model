@@ -33,7 +33,7 @@ namespace Budget_Model.Models
             if (Date != null && Amount != 0 && Description != null)
             {
                 string _query = "INSERT INTO Entries (date,amount,description,holder,bank) SELECT @date, @amount, @description, @holder, @bank";
-                _query += " WHERE NOT EXISTS (SELECT * FROM [Entries] WHERE date=@date and amount=@amount and description=@description and bank=@bank";
+                _query += " WHERE NOT EXISTS (SELECT * FROM [Entries] WHERE date(date)=date(@date) and amount=@amount and description=@description and bank=@bank";
                 if (AccountType != AccountType.CreditCard)
                 {
                     _query += " and holder=@holder";
@@ -168,7 +168,7 @@ namespace Budget_Model.Models
                 string _query = "INSERT INTO [InvestmentTransactions] ";
                 _query += "(asset_symbol,date,transaction_description,holder,bank,price,quantity, maturity, coupon_rate, yield_to_maturity) ";
                 _query += "SELECT @symbol, @date, @description, @holder, @bank, @price, @quantity, @maturity, @coupon, @yield ";
-                _query += " WHERE NOT EXISTS (SELECT * FROM [InvestmentTransactions] WHERE date=@date and asset_symbol=@symbol ";
+                _query += " WHERE NOT EXISTS (SELECT * FROM [InvestmentTransactions] WHERE date(date)=date(@date) and asset_symbol=@symbol ";
                 _query += " and transaction_description=@description and holder=@holder and bank=@bank); ";
 
                 using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
@@ -190,9 +190,9 @@ namespace Budget_Model.Models
                         else
                         {
                             comm.Parameters.AddWithValue("@maturity", DBNull.Value);
-                            comm.Parameters.Add("@coupon", DbType.Double).Value = (object)CouponRate ?? DBNull.Value;
-                            comm.Parameters.Add("@yield", DbType.Double).Value = (object)YieldToMaturity ?? DBNull.Value;
                         }
+                        comm.Parameters.Add("@coupon", DbType.Double).Value = (object)CouponRate ?? DBNull.Value;
+                        comm.Parameters.Add("@yield", DbType.Double).Value = (object)YieldToMaturity ?? DBNull.Value;
 
                         conn.Open();
                         comm.ExecuteNonQuery();
@@ -208,7 +208,7 @@ namespace Budget_Model.Models
             using (SQLiteDataAdapter adapter = new SQLiteDataAdapter())
             {
                 string qry = @"SELECT * FROM InvestmentTransactions a 
-                        WHERE a.[date] BETWEEN @start AND @end ";
+                        WHERE date(a.[date]) BETWEEN date(@start) AND date(@end) ";
                 if (asset == "Treasuries")
                 {
                     qry += "AND asset_symbol LIKE '912%' ";
@@ -221,7 +221,7 @@ namespace Budget_Model.Models
                 {
                     qry += " AND holder = '" + selected_holder + "'";
                 }
-                qry += " ORDER BY [date]";
+                qry += " ORDER BY date([date])";
                 using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
                 {
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
@@ -263,7 +263,7 @@ namespace Budget_Model.Models
             if (Date != null && Amount != 0 && Description != null)
             {
                 string _query = "INSERT INTO [Entries] (date,amount,description,holder,bank) SELECT @date, @amount, @description, @holder, @bank ";
-                _query += " WHERE NOT EXISTS (SELECT * FROM [Entries] WHERE date=@date and amount=@amount and description=@description and holder=@holder and bank=@bank); ";
+                _query += " WHERE NOT EXISTS (SELECT * FROM [Entries] WHERE date(date)=date(@date) and amount=@amount and description=@description and holder=@holder and bank=@bank); ";
 
                 string bank_name = Bank;
                 switch (AccountType)
@@ -304,30 +304,32 @@ namespace Budget_Model.Models
                     string qry = "";
                     if (datatype == "Cumulative")
                     {
-                        qry = @"SELECT DISTINCT [date], holder, SUM(a.amount) OVER (PARTITION BY holder ORDER BY a.[date]) AS amount
-                        FROM Statements a WHERE a.category = 'Investment Gains' AND a.[date] BETWEEN date(@start) and date(@end)
-                        UNION SELECT DISTINCT [date], 'Home', SUM(a.amount) OVER (ORDER BY a.[date]) AS amount
-                        FROM Statements a WHERE a.category = 'Investment Gains' AND a.[date] BETWEEN date(@start) and date(@end)
-                        ORDER BY [date]";
+                        qry = @"SELECT DISTINCT [date], holder, SUM(a.amount) OVER (PARTITION BY holder ORDER BY date(a.[date])) AS amount
+                        FROM (SELECT [date], holder, sum(amount) as amount FROM Statements WHERE category = 'Investment Gains' GROUP BY date(date), holder) a 
+                        WHERE date(a.[date]) BETWEEN date(@start) and date(@end)
+                        UNION SELECT DISTINCT date([date]) as [date], 'Home', SUM(a.amount) OVER (ORDER BY a.[date]) AS amount
+                        FROM (SELECT [date], sum(amount) as amount FROM Statements a WHERE category = 'Investment Gains' GROUP BY date(date)) a 
+                        WHERE date(a.[date]) BETWEEN date(@start) and date(@end)
+                        ORDER BY date([date])";
                     }
                     else if (datatype == "Percentage")
                     {
-                        qry = @";WITH t ([date], holder, gain, ending_mkt_value) as
-                        (SELECT a.[date] as [date], b.holder, SUM(a.amount) as gain, ending_mkt_value
-                        FROM EndMarketValues b LEFT JOIN Statements a ON date(a.[date]) = date(b.[date],'start of month','+2 month','-1 day') and a.holder = b.holder
-                        WHERE a.category = 'Investment Gains' AND a.[date] BETWEEN @start and @end 
-                        GROUP BY a.[date], b.holder, ending_mkt_value )
+                        qry = @";WITH t as
+                        (SELECT a.[date], b.holder, SUM(a.amount) as gain, ending_mkt_value
+                        FROM EndMarketValues b LEFT JOIN Statements a ON DATE(a.[date]) = DATE(b.[date],'start of month','+2 month','-1 day') and a.holder = b.holder
+                        WHERE a.category = 'Investment Gains' AND DATE(a.[date]) BETWEEN DATE(@start) and DATE(@end) 
+                        GROUP BY DATE(a.[date]), b.holder, ending_mkt_value )
                         SELECT [date], holder, gain/ending_mkt_value as amount FROM t
-                        UNION SELECT [date], 'Home', SUM(gain)/sum(ending_mkt_value) FROM t GROUP BY [date] ORDER BY [date]";
+                        UNION SELECT date([date]), 'Home', SUM(gain)/sum(ending_mkt_value) FROM t GROUP BY DATE([date]) ORDER BY DATE([date])";
                     }
                     else
                     {
                         qry = @"SELECT [date], holder, SUM(amount) AS amount
-                        FROM Statements WHERE category = 'Investment Gains' AND [date] BETWEEN date(@start) and date(@end)
-                        GROUP BY [date], holder
-                        UNION SELECT [date], 'Home', SUM(amount) AS amount
-                        FROM Statements WHERE category = 'Investment Gains' AND [date] BETWEEN date(@start) and date(@end)
-                        GROUP BY [date] ORDER BY [date]";
+                        FROM Statements WHERE category = 'Investment Gains' AND date([date]) BETWEEN date(@start) and date(@end)
+                        GROUP BY date([date]), holder
+                        UNION SELECT date([date]) as [date], 'Home', SUM(amount) AS amount
+                        FROM Statements WHERE category = 'Investment Gains' AND date([date]) BETWEEN date(@start) and date(@end)
+                        GROUP BY date([date]) ORDER BY date([date])";
                     }
 
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
@@ -359,9 +361,9 @@ namespace Budget_Model.Models
                 string qry = "SELECT gross_salary FROM GrossSalary ";
                 if (default_salary)
                 {
-                    qry += @" INNER JOIN (SELECT holder, max(date) as maxdate from GrossSalary GROUP BY holder) a 
-                        ON GrossSalary.holder = a.holder and GrossSalary.date = a.maxdate ";
-                    qry += " WHERE GrossSalary.holder = @holder" + (default_salary ? "" : " and date = @date");
+                    qry += @" INNER JOIN (SELECT holder, max(date(date)) as maxdate from GrossSalary GROUP BY holder) a 
+                        ON GrossSalary.holder = a.holder and date(GrossSalary.date) = date(a.maxdate) ";
+                    qry += " WHERE GrossSalary.holder = @holder" + (default_salary ? "" : " and date(date) = date(@date)");
                 }
                 using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                 {
@@ -380,8 +382,8 @@ namespace Budget_Model.Models
         {
             using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
             {
-                string qry = "select date(min(date), 'start of month') as start_date, date(max(date), 'start of month') as end_date";
-                qry += " from (select date from GrossSalary where holder = @holder UNION select date from entries where holder = @holder) ";
+                string qry = "select date(min(date(date)), 'start of month') as start_date, date(max(date(date)), 'start of month') as end_date";
+                qry += " from (select date(date) as date from GrossSalary where holder = @holder UNION select date(date) from entries where holder = @holder) ";
                 using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                 {
                     cmd.Parameters.Add("@holder", DbType.String, 50).Value = Holder;
@@ -407,7 +409,7 @@ namespace Budget_Model.Models
             using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
             {
                 string qry_del = "DELETE FROM GrossSalary ";
-                qry_del += " WHERE date = @date and holder = @holder";
+                qry_del += " WHERE date(date) = date(@date) and holder = @holder";
                 using (SQLiteCommand cmd_del = new SQLiteCommand(qry_del, conn))
                 {
                     cmd_del.Parameters.AddWithValue("@date", Date.ToString("yyyy-MM-dd"));
@@ -424,7 +426,7 @@ namespace Budget_Model.Models
                 using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
                 {
                     string qry = "INSERT INTO GrossSalary SELECT @date, @holder, @gross_salary ";
-                    qry += " WHERE NOT EXISTS (SELECT 1 FROM GrossSalary WHERE date = @date and holder = @holder) ";
+                    qry += " WHERE NOT EXISTS (SELECT 1 FROM GrossSalary WHERE date(date)=date(@date) and holder = @holder) ";
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                     {
                         cmd.Parameters.AddWithValue("@date", Date.ToString("yyyy-MM-dd"));

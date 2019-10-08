@@ -126,18 +126,21 @@ namespace Budget_Model.Models
             double result = 0;
             using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
             {
+                switch (acctype)
+                {
+                    case AccountType.Savings:
+                        bank += "_savings"; break;
+                    case AccountType.Checking:
+                        bank += "_checking"; break;
+                    case AccountType.CreditCard:
+                        bank += "_credit"; break;
+                    default:
+                        bank += "_broker"; break;
+                }
                 string qry = "";
                 if (acctype == AccountType.Checking || acctype == AccountType.Savings)
                 {
                     qry = "SELECT SUM(amount) FROM Entries WHERE date([date]) <= date(@enddate) AND bank = @bank";
-                    if (acctype == AccountType.Checking)
-                    {
-                        bank += "_checking";
-                    }
-                    else
-                    {
-                        bank += "_savings";
-                    }
                 }
                 else if (acctype == AccountType.Brokerage)
                 {
@@ -171,7 +174,7 @@ namespace Budget_Model.Models
 
         public static DataTable GetTransactionsByCategory(string _category, DateTime statement_date, string selected_person)
         {
-            string category = "";
+            string category = _category == null ? "": _category;
             switch (_category)
             {
                 case "Net Pay Earnings":
@@ -197,7 +200,7 @@ namespace Budget_Model.Models
                     string qry = "";
                     if (category == "Trading Account")
                     {
-                        qry = "select date, asset_symbol as category, asset_description as description, ending_mkt_value as amount from FinancialAssets WHERE [date] = @end";
+                        qry = "select date, asset_symbol as category, asset_description as description, ending_mkt_value as amount from FinancialAssets WHERE date([date]) = date(@end)";
                         qry += ((selected_person != "Home") ? " AND holder = @holder" : "");
                     }
                     else
@@ -222,7 +225,7 @@ namespace Budget_Model.Models
                             {
                                 qry += " AND description like '%employer match%' AND category = 'Retirement Contribution' ";
                                 qry += " UNION SELECT [date], 'Gross Salary', 'Gross Salary', sum(gross_salary) FROM GrossSalary WHERE date([date]) = date(@start) ";
-                                qry += ((selected_person != "Home") ? " AND holder = @holder" : "") + " GROUP BY [date]";
+                                qry += ((selected_person != "Home") ? " AND holder = @holder" : "") + " GROUP BY date([date])";
                             }
                             else
                             {
@@ -231,7 +234,7 @@ namespace Budget_Model.Models
                         }
 
                     }
-                    qry += " order by date";
+                    qry += " order by date(date)";
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                     {
                         adapter.SelectCommand = cmd;
@@ -266,10 +269,10 @@ namespace Budget_Model.Models
                         WHERE d.date BETWEEN date(@start) and date(@end)
                         )
                         UNION SELECT period, 'Home', COALESCE(RunningBalance, 0) + COALESCE(ending_mkt_value,0) as NetWorth FROM 
-                        (SELECT b.period, ending_mkt_value, runningbalance FROM " + datatable + @"_All b LEFT JOIN (SELECT [date], SUM(ending_mkt_value) as ending_mkt_value FROM EndMarketValues GROUP BY [date]) c ON DATE(b.period, 'start of month', '+1 month', '-1 day') = DATE(c.date)
+                        (SELECT b.period, ending_mkt_value, runningbalance FROM " + datatable + @"_All b LEFT JOIN (SELECT [date], SUM(ending_mkt_value) as ending_mkt_value FROM EndMarketValues GROUP BY date([date])) c ON DATE(b.period, 'start of month', '+1 month', '-1 day') = DATE(c.date)
                         WHERE b.period BETWEEN date(@start) and date(@end)
-                        UNION SELECT c.date, ending_mkt_value, runningbalance FROM (SELECT [date], SUM(ending_mkt_value) as ending_mkt_value FROM EndMarketValues GROUP BY [date]) c LEFT JOIN " + datatable + @"_All b ON DATE(b.period, 'start of month', '+1 month', '-1 day') = DATE(c.date)
-                        WHERE c.date BETWEEN date(@start) and date(@end)
+                        UNION SELECT c.date, ending_mkt_value, runningbalance FROM (SELECT [date], SUM(ending_mkt_value) as ending_mkt_value FROM EndMarketValues GROUP BY date([date])) c LEFT JOIN " + datatable + @"_All b ON DATE(b.period, 'start of month', '+1 month', '-1 day') = DATE(c.date)
+                        WHERE date(c.date) BETWEEN date(@start) and date(@end)
                         )
                         ORDER BY [period]";
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
@@ -343,7 +346,7 @@ namespace Budget_Model.Models
                         WHERE DATE(b.period) BETWEEN date(@start) and date(@end)
                         AND b.category != 'Miscellaneous' AND b.category != 'Investment Gains'
                         AND b.amount " + operator_expenses_income + @" 0) all_tbl
-                        GROUP BY period, holder ORDER BY [period]";
+                        GROUP BY date(period), holder ORDER BY [period]";
                     }
                     else if (selected_category == "Gross Salary")
                     {
@@ -351,7 +354,7 @@ namespace Budget_Model.Models
                         WHERE DATE(a.date) BETWEEN date(@start) and date(@end)
                         UNION SELECT DATE([date]) as period, 'Home' as holder, SUM(gross_salary) as amount FROM GrossSalary b
                         WHERE DATE(b.date) BETWEEN date(@start) and date(@end)
-                        GROUP BY b.date ORDER BY [period]";
+                        GROUP BY date(b.date) ORDER BY [period]";
                     }
                     else
                     {
@@ -388,7 +391,7 @@ namespace Budget_Model.Models
             if (type == "expenses")
             {
                 qry_table = "(SELECT period, SUM(amount) as amount FROM " + (selected_person == "Home" ? "Home" : "Individual") + @"_Monthly
-                          WHERE period BETWEEN date(@start) and date(@end) " + (selected_person == "Home" ? "" : "AND holder = @holder ") + @"
+                          WHERE date(period) BETWEEN date(@start) and date(@end) " + (selected_person == "Home" ? "" : "AND holder = @holder ") + @"
                           AND category != 'Miscellaneous' AND amount < 0 GROUP BY period)a";
             }
             else if (type == "savings")
@@ -401,13 +404,13 @@ namespace Budget_Model.Models
                 else
                 {
                     qry_table = @"(SELECT SUM(amount) as amount FROM NetSavings_bef_misc_Monthly a 
-                              WHERE a.period BETWEEN date(@start) and date(@end) GROUP BY [period])a";
+                              WHERE a.period BETWEEN date(@start) and date(@end) GROUP BY date([period]))a";
                 }
             }
             else
             {
                 qry_table = "(SELECT * FROM " + (selected_person == "Home" ? "Home" : "Individual") + @"_Monthly a 
-                          WHERE a.period BETWEEN date(@start) and date(@end) " + (selected_person == "Home" ? "" : "AND a.holder = @holder ") + @"
+                          WHERE date(a.period) BETWEEN date(@start) and date(@end) " + (selected_person == "Home" ? "" : "AND a.holder = @holder ") + @"
                          AND a.category = '" + type + "')a";
             }
 

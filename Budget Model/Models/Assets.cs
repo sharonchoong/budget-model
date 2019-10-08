@@ -34,7 +34,7 @@ namespace Budget_Model.Models
             {
                 string _query = "INSERT INTO [FinancialAssets] ([date], asset_symbol, asset_description, ending_mkt_value, holder, bank) SELECT @date, ";
                 _query += "@symbol, @description, @value, @holder, @bank ";
-                _query += "WHERE NOT EXISTS (SELECT * FROM [FinancialAssets] WHERE date=@date and ending_mkt_value=@value";
+                _query += "WHERE NOT EXISTS (SELECT * FROM [FinancialAssets] WHERE date(date)=date(@date) and ending_mkt_value=@value";
                 _query += " and asset_symbol=@symbol and holder=@holder and bank=@bank);";
 
                 using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
@@ -66,7 +66,7 @@ namespace Budget_Model.Models
                     string qry = "SELECT [date], asset_symbol, asset_description, category, holder, bank, ending_mkt_value, ";
                     qry += " case when category is not null then 1 else 0 end as category_sort ";
                     qry += " FROM Investments";
-                    qry += " WHERE [date] = (SELECT MAX([date]) FROM Investments WHERE [date] <= date(@date, 'start of month','+1 month','-1 day')) ";
+                    qry += " WHERE date([date]) = (SELECT MAX(date([date])) FROM Investments WHERE date([date]) <= date(@date, 'start of month','+1 month','-1 day')) ";
                     if (selected_person != "Home")
                     {
                         qry += " AND holder = '" + selected_person + "' ";
@@ -92,7 +92,7 @@ namespace Budget_Model.Models
                 {
                     string qry = @"SELECT a.[date], " + (asset_column == null ? "" : asset_column + ", ") + @"
                         a.category, category_order, SUM(a.ending_mkt_value) as ending_mkt_value FROM Investments a 
-                        WHERE a.[date] BETWEEN @start and @end ";
+                        WHERE date(a.[date]) BETWEEN date(@start) and date(@end) ";
                     if (specific_category != null)
                     {
                         qry += " AND category = '" + specific_category + "'";
@@ -106,7 +106,7 @@ namespace Budget_Model.Models
                     {
                         qry += " AND holder = '" + selected_person + "'";
                     }
-                    qry += " GROUP by [date], " + (asset_column == null ? "" : asset_column + ", ") + "category, category_order ORDER BY [date], category_order";
+                    qry += " GROUP by date([date]), " + (asset_column == null ? "" : asset_column + ", ") + "category, category_order ORDER BY date([date]), category_order";
 
                     using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                     {

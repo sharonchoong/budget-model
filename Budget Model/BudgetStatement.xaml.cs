@@ -144,6 +144,7 @@ namespace Budget_Model
                                     NetWorthGrid.ColumnDefinitions.Add(new ColumnDefinition());
                                 }
                                 TextBlock txt_acc = Helpers.GridHelper.CreateTextInGrid(acc.AccountTypeDescription, 0, acctypes.Count + 1, false, HorizontalAlignment.Center, true, false, true);
+                                NetWorthGrid.Children.Add(txt_acc);
                                 acctypes.Add(acc.AccountType);
                             }
                             double balance = statement.GetBalance(acc.AccountType, fi.ShortName);
