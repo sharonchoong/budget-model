@@ -1,4 +1,4 @@
-# Budget Model App [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0d5d8c2bd2964861ac67dcf2a5e62f22)](https://www.codacy.com/manual/meisienchoong/budget-model?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sharonchoong/budget-model&amp;utm_campaign=Badge_Grade)
+# Budget Model App [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0d5d8c2bd2964861ac67dcf2a5e62f22)](https://www.codacy.com/manual/SharonChoong/budget-model?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sharonchoong/budget-model&amp;utm_campaign=Badge_Grade)
 
 A simple Windows desktop app in WPF that tracks monthly expense/income budget, net worth, and financial investments across all bank and brokerage accounts.  All data is local.
 
