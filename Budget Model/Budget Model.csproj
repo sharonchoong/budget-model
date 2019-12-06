@@ -179,9 +179,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="App_Data\BudgetData.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="App_Data\BudgetData.db" />
     <None Include="App_Data\BudgetData_Sample.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
