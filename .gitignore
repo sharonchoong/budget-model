@@ -5,6 +5,6 @@ Budget Model/obj/
 Budget Model/bin/Debug/App_Data/BudgetData.db
 Budget Model/Models/FinancialInstitutions.cs
 Budget Model/App_Data/BudgetData.db
-Budget Model/Connections.config
-Budget Model/CustomAppSettings.config
+# Budget Model/Connections.config
+# Budget Model/CustomAppSettings.config
 .vs/
