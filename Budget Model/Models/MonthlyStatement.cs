@@ -262,13 +262,13 @@ namespace Budget_Model.Models
             {
                 using (SQLiteDataAdapter adapter = new SQLiteDataAdapter())
                 {
-                    string qry = @"SELECT period, holder, COALESCE(RunningBalance, 0) + COALESCE(ending_mkt_value,0) AS NetWorth FROM 
+                    string qry = @"SELECT date(period) as period, holder, COALESCE(RunningBalance, 0) + COALESCE(ending_mkt_value,0) AS NetWorth FROM 
                         (SELECT a.holder, a.period, ending_mkt_value, runningbalance FROM " + datatable + @" a LEFT JOIN EndMarketValues d ON DATE(a.period, 'start of month', '+1 month', '-1 day') = DATE(d.date) and a.holder = d.holder
                         WHERE a.period BETWEEN date(@start) and date(@end)
                         UNION SELECT d.holder, d.date, ending_mkt_value, runningbalance FROM EndMarketValues d LEFT JOIN " + datatable + @" a ON DATE(a.period, 'start of month', '+1 month', '-1 day') = DATE(d.date) and a.holder = d.holder
                         WHERE d.date BETWEEN date(@start) and date(@end)
                         )
-                        UNION SELECT period, 'Home', COALESCE(RunningBalance, 0) + COALESCE(ending_mkt_value,0) as NetWorth FROM 
+                        UNION SELECT date(period), 'Home', COALESCE(RunningBalance, 0) + COALESCE(ending_mkt_value,0) as NetWorth FROM 
                         (SELECT b.period, ending_mkt_value, runningbalance FROM " + datatable + @"_All b LEFT JOIN (SELECT [date], SUM(ending_mkt_value) as ending_mkt_value FROM EndMarketValues GROUP BY date([date])) c ON DATE(b.period, 'start of month', '+1 month', '-1 day') = DATE(c.date)
                         WHERE b.period BETWEEN date(@start) and date(@end)
                         UNION SELECT c.date, ending_mkt_value, runningbalance FROM (SELECT [date], SUM(ending_mkt_value) as ending_mkt_value FROM EndMarketValues GROUP BY date([date])) c LEFT JOIN " + datatable + @"_All b ON DATE(b.period, 'start of month', '+1 month', '-1 day') = DATE(c.date)
