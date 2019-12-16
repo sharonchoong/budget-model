@@ -75,6 +75,7 @@
             <ComboBoxItem Selector.IsSelected="True">Cumulative</ComboBoxItem>
             <ComboBoxItem>Month-By-Month</ComboBoxItem>
             <ComboBoxItem>Percentage</ComboBoxItem>
+            <ComboBoxItem>Cumulative Percentage</ComboBoxItem>
         </ComboBox>
         <TextBlock Grid.Row="1" Grid.Column="0"  Margin="190,0,0,0" FontWeight="Bold" 
                Text=" Investment Gains" HorizontalAlignment="Left" VerticalAlignment="Center" />

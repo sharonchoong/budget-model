@@ -228,7 +228,7 @@ namespace Budget_Model
             });
             gainformatter = "C0";
 
-            if (datatype == "Percentage")
+            if (datatype.Contains("Percentage"))
             {
                 gainformatter = "P2";
             }

@@ -312,7 +312,7 @@ namespace Budget_Model.Models
                         WHERE date(a.[date]) BETWEEN date(@start) and date(@end)
                         ORDER BY date([date])";
                     }
-                    else if (datatype == "Percentage")
+                    else if (datatype == "Percentage" || datatype == "Cumulative Percentage")
                     {
                         qry = @";WITH t as
                         (SELECT a.[date], b.holder, SUM(a.amount) as gain, ending_mkt_value
@@ -340,6 +340,30 @@ namespace Budget_Model.Models
                         adapter.Fill(dt);
                     }
                 }
+            }
+            if (datatype == "Cumulative Percentage")
+            {
+                dt = dt.AsEnumerable().OrderBy(r => r["holder"]).ThenBy(r => r["date"]).CopyToDataTable();
+                List<DataRow> rows = new List<DataRow>();
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    double return_pct = Convert.ToDouble(dt.Rows[i]["amount"]);
+                    bool is_beginning = i == 0 || dt.Rows[i]["holder"].ToString() != dt.Rows[i - 1]["holder"].ToString();
+                    if (is_beginning)
+                    {
+                        DataRow row = dt.NewRow();
+                        row["date"] = Convert.ToDateTime(dt.Rows[i]["date"]).AddMonths(-1);
+                        row["holder"] = dt.Rows[i]["holder"].ToString();
+                        row["amount"] = 1;
+                        rows.Add(row);
+                    }
+                    dt.Rows[i]["amount"] = (1+return_pct) * (is_beginning ? 1: dt.Rows[i - 1].Field<double>("amount"));
+                }
+                foreach (DataRow row in rows)
+                {
+                    dt.Rows.Add(row);
+                }
+                dt = dt.AsEnumerable().OrderBy(r => r["holder"]).ThenBy(r => r["date"]).CopyToDataTable();
             }
             return dt;
         }
