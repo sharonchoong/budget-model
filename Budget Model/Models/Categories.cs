@@ -51,10 +51,11 @@ namespace Budget_Model.Models
                     if (is_insert)
                     {
                         qry = "INSERT INTO Definitions (category, keyword, id) SELECT @category, @keyword, Entries.id FROM Entries WHERE description LIKE "
-                            + (Keyword.StartsWith("~") ? "" : "'%' ||") + " @keyword " + (Keyword.EndsWith("~") ? "" : "|| '%'");
+                            + (Keyword.StartsWith("~") ? "" : "'%' ||") + " @keyword2 " + (Keyword.EndsWith("~") ? "" : "|| '%'");
                         cmd.CommandText = qry;
                         cmd.Parameters.Add("@category", DbType.String, 100).Value = Category;
-                        cmd.Parameters.Add("@keyword", DbType.String, 100).Value = Keyword.Replace("~","");
+                        cmd.Parameters.Add("@keyword", DbType.String, 100).Value = Keyword;
+                        cmd.Parameters.Add("@keyword2", DbType.String, 100).Value = Keyword.Replace("~", "");
                         cmd.ExecuteNonQuery();
                     }
 
