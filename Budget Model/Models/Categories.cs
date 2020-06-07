@@ -125,7 +125,7 @@ namespace Budget_Model.Models
             using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
             {
                 string qry;
-                qry = @"SELECT category FROM InvestmentCategories ORDER BY category_order";
+                qry = @"SELECT category FROM (SELECT category, category_order FROM InvestmentCategories  UNION SELECT 'Bank Cash', 1000)a ORDER BY category_order";
                 using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                 {
                     conn.Open();

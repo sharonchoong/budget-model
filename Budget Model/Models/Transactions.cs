@@ -207,13 +207,13 @@ namespace Budget_Model.Models
             DataTable dt = new DataTable();
             using (SQLiteDataAdapter adapter = new SQLiteDataAdapter())
             {
-                string qry = @"SELECT * FROM InvestmentTransactions a 
+                string qry = @"SELECT *, price * quantity as mkt_value FROM InvestmentTransactions a 
                         WHERE date(a.[date]) BETWEEN date(@start) AND date(@end) ";
                 if (asset == "Treasuries")
                 {
                     qry += "AND asset_symbol LIKE '912%' ";
                 }
-                else
+                else if (asset != null)
                 {
                     qry += "AND asset_symbol = @asset ";
                 }
@@ -235,7 +235,6 @@ namespace Budget_Model.Models
                 }
             }
             return dt;
-
         }
     }
 

@@ -147,29 +147,37 @@ namespace Budget_Model
             }
         }
 
-        public void FillDataGrid(string date)
+        public void FillDataGrid(string date, string asset = null)
         {
-            //filling datagrid 
+            //filling datagrid investments
             string selected_person = "";
-            DateTime date_selected = new DateTime();
+            DateTime date_selected_to = new DateTime();
+            DateTime date_selected_from = new DateTime();
             Dispatcher.Invoke(() =>
             {
                 selected_person = HoldersItems.Where(r => r.IsChecked == true).Select(x => x.HolderName).First();
                 if (date == null)
                 {
-                    date_selected = Convert.ToDateTime(date_month_to.SelectedDate);
+                    date_selected_to = Convert.ToDateTime(date_month_to.SelectedDate);
+                    date_selected_from = Convert.ToDateTime(date_month_to.SelectedDate).AddMonths(-3);
                 }
                 else
                 {
-                    DateTime.TryParseExact(date, "MMM yy", new System.Globalization.CultureInfo("en-US"), System.Globalization.DateTimeStyles.None, out date_selected);
+                    DateTime.TryParseExact(date, "MMM yy", new System.Globalization.CultureInfo("en-US"), System.Globalization.DateTimeStyles.None, out date_selected_to);
+                    date_selected_from = Convert.ToDateTime(date_month_from.SelectedDate);
                 }
             });
-            DataTable dt = BrokerageAsset.GetMonthInvestments(selected_person, date_selected);
+            DataTable dt_investments = BrokerageAsset.GetMonthInvestments(selected_person, date_selected_to);
+            DataTable dt_transactions = BrokerageTransaction.GetHistoricalTransactions(asset, selected_person, date_selected_from, date_selected_to.AddMonths(1).AddDays(-1));
+            if (dt_transactions.Rows.Count > 0)
+            {
+                dt_transactions = dt_transactions.AsEnumerable().OrderByDescending(r => r["date"]).CopyToDataTable();
+            }
             Dispatcher.Invoke(() =>
             {
-                if (dt.Rows.Count > 0)
+                if (dt_investments.Rows.Count > 0)
                 {
-                    date_grid.Text = "Date: " + dt.Rows[0].Field<DateTime>("date").ToShortDateString();
+                    date_grid.Text = "Date: " + dt_investments.Rows[0].Field<DateTime>("date").ToShortDateString();
                 }
                 else
                 {
@@ -177,7 +185,11 @@ namespace Budget_Model
                 }
                 DataGridInvestments.CommitEdit();
                 DataGridInvestments.CommitEdit();
-                DataGridInvestments.DataContext = dt;
+                DataGridInvestments.DataContext = dt_investments;
+
+                DataGridTransactions.CommitEdit();
+                DataGridTransactions.CommitEdit();
+                DataGridTransactions.DataContext = dt_transactions;
             });
         }
 
@@ -280,7 +292,7 @@ namespace Budget_Model
             DataTable dt = BrokerageAsset.GetHistoricalInvestments(selected_person, null, null, from_month, to_month);
 
             IEnumerable<string> selectcategories = InvestmentCategory.Getcategories();
-            Brush[] colors = { Brushes.DarkGreen, Brushes.ForestGreen, Brushes.Gainsboro, Brushes.Gold, Brushes.DarkBlue };
+            Brush[] colors = { Brushes.DarkGreen, Brushes.ForestGreen, Brushes.Gainsboro, Brushes.DimGray, Brushes.Gold, Brushes.Orange, Brushes.DarkBlue };
             Dispatcher.Invoke(() =>
             {
                 int count = 0;
@@ -299,7 +311,7 @@ namespace Budget_Model
                             DataLabels = true,
                             LabelPoint = point => (point.Y / 1000).ToString("C1") + "k",
                             LabelsPosition = BarLabelPosition.Perpendicular,
-                            Foreground = System.Windows.Media.Brushes.Black
+                            Foreground = Brushes.Black
                         });
                         count++;
                     }
@@ -642,8 +654,8 @@ namespace Budget_Model
 
         public void ClickAsset(object sender, ChartPoint p)
         {
-            FillDataGrid(MonthFormatter(p.X));
             string asset = p.SeriesView.Title;
+            FillDataGrid(MonthFormatter(p.X), asset);
             if (category_clicked != "Cash" && !new [] { "Treasuries", "Bonds", "CDs" }.Contains(category_clicked))
             {
                 Task.Factory.StartNew(() => {

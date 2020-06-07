@@ -145,28 +145,59 @@
 
         <TextBlock Grid.Row="5" Grid.Column="1"  Margin="10,10,50,10" FontWeight="Bold" Name="label_secstats"
                Text="Statistics for " HorizontalAlignment="Left" VerticalAlignment="Center" />
-
-        <Grid Grid.Row="6" Grid.Column="1" Name="gridstats">
+        
+        <Grid Grid.Row="6" Grid.Column="1" Margin="0,0,10,10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="2*" />
             </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Grid.Column="0" Name="gridstats" Margin="0,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+            </Grid>
+
+            <TextBlock Grid.Row="1" Grid.Column="0"  Margin="10,10,50,10" FontWeight="Bold"
+               Text="Transactions" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            
+            <DataGrid Grid.Row="2" Grid.Column="0" Name="DataGridTransactions" CellEditEnding="GridCellEditEnding"
+                  ItemsSource="{Binding}" AutoGenerateColumns="False" ColumnWidth="*" CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Holder" IsReadOnly="True" Width="Auto" Binding="{Binding holder}" />
+                    <DataGridTextColumn Header="Date" IsReadOnly="True" Width="Auto" Binding="{Binding date, StringFormat=\{0:MM/dd/yyyy\}}"  SortDirection="Descending" />
+                    <DataGridTextColumn Header="Symbol" IsReadOnly="True" Width="Auto" Binding="{Binding asset_symbol}" />
+                    <DataGridTextColumn Header="Description" IsReadOnly="True" Binding="{Binding transaction_description}" FontSize="10" />
+                    <DataGridTextColumn Header="Price" IsReadOnly="True" Width="Auto" Binding="{Binding price, StringFormat=\{0:C2\}}" CellStyle="{StaticResource RightAlignment}" />
+                    <DataGridTextColumn Header="Quantity" IsReadOnly="True" Width="Auto" Binding="{Binding quantity}" CellStyle="{StaticResource RightAlignment}" />
+                    <DataGridTextColumn Header="Mkt Value" IsReadOnly="True" Width="Auto" Binding="{Binding mkt_value, StringFormat=\{0:C0\}}" CellStyle="{StaticResource RightAlignment}" />
+                    <DataGridTextColumn Header="YTM" IsReadOnly="True" Width="Auto" Binding="{Binding yield_to_maturity, StringFormat=\{0:P2\}}" CellStyle="{StaticResource RightAlignment}" />
+                    <DataGridTextColumn Header="Maturity" IsReadOnly="True" Width="Auto" Binding="{Binding maturity, StringFormat=\{0:MM/dd/yyyy\}}" />
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
+        
     </Grid>
 </Page>

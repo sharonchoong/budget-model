@@ -90,30 +90,39 @@ namespace Budget_Model.Models
             {
                 using (SQLiteDataAdapter adapter = new SQLiteDataAdapter())
                 {
-                    string qry = @"SELECT a.[date], " + (asset_column == null ? "" : asset_column + ", ") + @"
+                    string qry_investments = @"SELECT a.[date], " + (asset_column == null ? "" : asset_column + ", ") + @"
                         a.category, category_order, SUM(a.ending_mkt_value) as ending_mkt_value FROM Investments a 
                         WHERE date(a.[date]) BETWEEN date(@start) and date(@end) ";
+                    string qry_bankaccounts = @"SELECT a.[period] AS [date], 'Bank Cash' as " + (asset_column == null ? "asset_description" : asset_column) + @",
+                        'Bank Cash' as category, 1000 as category_order, RunningBalance as ending_mkt_value FROM MonthlyBalance" + (selected_person != "Home" ? "": "_All")+ @" a 
+                        WHERE date(a.[period]) BETWEEN date(@start) and date(@end) ";
                     if (specific_category != null)
                     {
-                        qry += " AND category = '" + specific_category + "'";
+                        qry_investments += " AND category = '" + specific_category + "'";
+                        qry_bankaccounts += " AND category = '" + specific_category + "'";
                     }
                     else
                     {
-                        qry += " AND category IS NOT NULL ";
+                        qry_investments += " AND category IS NOT NULL ";
+                        qry_bankaccounts += " AND category IS NOT NULL ";
                     }
 
                     if (selected_person != "Home")
                     {
-                        qry += " AND holder = '" + selected_person + "'";
+                        qry_investments += " AND holder = '" + selected_person + "'";
+                        qry_bankaccounts += " AND holder = '" + selected_person + "'";
                     }
-                    qry += " GROUP by date([date]), " + (asset_column == null ? "" : asset_column + ", ") + "category, category_order ORDER BY date([date]), category_order";
+                    qry_investments += " GROUP by date([date]), " + (asset_column == null ? "" : asset_column + ", ") + "category, category_order ORDER BY date([date]), category_order";
 
-                    using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
+                    foreach (string qry in new string[] { qry_investments, qry_bankaccounts })
                     {
-                        adapter.SelectCommand = cmd;
-                        adapter.SelectCommand.Parameters.AddWithValue("@start", from_month.ToString("yyyy-MM-dd"));
-                        adapter.SelectCommand.Parameters.AddWithValue("@end", to_month.ToString("yyyy-MM-dd"));
-                        adapter.Fill(dt);
+                        using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
+                        {
+                            adapter.SelectCommand = cmd;
+                            adapter.SelectCommand.Parameters.AddWithValue("@start", from_month.ToString("yyyy-MM-dd"));
+                            adapter.SelectCommand.Parameters.AddWithValue("@end", to_month.ToString("yyyy-MM-dd"));
+                            adapter.Fill(dt);
+                        }
                     }
                 }
             }
