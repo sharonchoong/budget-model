@@ -56,7 +56,7 @@ namespace Budget_Model
             comboFormat.DataContext = this;
             comboFormat.SelectedIndex = 0;
 
-            comboDate.SelectedIndex = 0;
+            comboDate.SelectedIndex = 4;
             Holders.ItemsSource = holder.GetHolders;
             Categories.ItemsSource = BudgetCategory.GetCategories();
             CustomCategories.ItemsSource = BudgetCategory.GetCategories().Concat(new[] { "" });

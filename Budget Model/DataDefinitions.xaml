@@ -112,11 +112,11 @@
 
         <ComboBox Grid.Row="1" Grid.Column="0" Margin="10" Width="200" Name="comboDate" SelectionChanged="SelectionChanged"
                   HorizontalAlignment="Left" VerticalAlignment="Center">
-            <ComboBoxItem Selector.IsSelected="True">Last 3 Months</ComboBoxItem>
+            <ComboBoxItem>Last 3 Months</ComboBoxItem>
             <ComboBoxItem >Last 6 Months</ComboBoxItem>
             <ComboBoxItem >Last Year</ComboBoxItem>
             <ComboBoxItem >Last 2 Years</ComboBoxItem>
-            <ComboBoxItem >All</ComboBoxItem>
+            <ComboBoxItem Selector.IsSelected="True" >All</ComboBoxItem>
         </ComboBox>
         <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Name="DataGridDefinitions" BeginningEdit="GridBeginningEdit" CellEditEnding="GridCellEditEnding" 
                   ItemsSource="{Binding}" AutoGenerateColumns="False" Margin="10" ColumnWidth="*" CanUserAddRows="False">
