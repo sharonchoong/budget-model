@@ -599,34 +599,34 @@ namespace Budget_Model
                 if (dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("bought", StringComparison.OrdinalIgnoreCase) >= 0).Count() != 0 ||
                     dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("buy", StringComparison.OrdinalIgnoreCase) >= 0).Count() != 0)
                 {
+                    IEnumerable<DataRow> dr_bought = dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("bought", StringComparison.OrdinalIgnoreCase) >= 0
+                            || r["transaction_description"].ToString().IndexOf("buy", StringComparison.OrdinalIgnoreCase) >= 0);
                     PriceSeriesCollection.Add(new ScatterSeries
                     {
                         Title = "Bought",
-                        Values = new ChartValues<DateModel>(dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("bought", StringComparison.OrdinalIgnoreCase) >= 0 
-                            || r["transaction_description"].ToString().IndexOf("buy", StringComparison.OrdinalIgnoreCase) >= 0)
-                            .Select(r => new DateModel { DateTime = r.Field<DateTime>("date"), Value = r.Field<double?>(variable_sql) ?? 0 }))
+                        Values = new ChartValues<DateModel>(dr_bought.Select(r => new DateModel { DateTime = r.Field<DateTime>("date"), Value = r.Field<double?>(variable_sql) ?? 0 }))
                     });
                     gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("Average " + variable_label + " Bought:", 0, 0));
-                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("bought", StringComparison.OrdinalIgnoreCase) >= 0 
-                        || r["transaction_description"].ToString().IndexOf("buy", StringComparison.OrdinalIgnoreCase) >= 0)
-                        .Average(r => r.Field<double>(variable_sql)).ToString(order_history_formatter), 0, 1));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(dr_bought.Sum(r => r.Field<double>(variable_sql) * r.Field<double>("quantity") / dr_bought.Sum(q => q.Field<double>("quantity")))
+                        .ToString(order_history_formatter), 0, 1));
                 }
+
                 if (dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("sold", StringComparison.OrdinalIgnoreCase) >= 0).Count() != 0 ||
                     dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("sell", StringComparison.OrdinalIgnoreCase) >= 0).Count() != 0)
-                { 
+                {
+                    IEnumerable<DataRow> dr_sold = dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("sold", StringComparison.OrdinalIgnoreCase) >= 0
+                             || r["transaction_description"].ToString().IndexOf("sell", StringComparison.OrdinalIgnoreCase) >= 0);
                     PriceSeriesCollection.Add(new ScatterSeries
                     {
                         Title = "Sold",
-                        Values = new ChartValues<DateModel>(dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("sold", StringComparison.OrdinalIgnoreCase) >= 0 
-                            || r["transaction_description"].ToString().IndexOf("sell", StringComparison.OrdinalIgnoreCase) >= 0)
-                            .Select(r => new DateModel { DateTime = r.Field<DateTime>("date"), Value = r.Field<double?>(variable_sql) ?? 0 }))
+                        Values = new ChartValues<DateModel>(dr_sold.Select(r => new DateModel { DateTime = r.Field<DateTime>("date"), Value = r.Field<double?>(variable_sql) ?? 0 }))
                     });
                     gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid("Average " + variable_label + " Sold:", 0, 2));
-                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(dt.AsEnumerable().Where(r => r["transaction_description"].ToString().IndexOf("sold", StringComparison.OrdinalIgnoreCase) >= 0 
-                        || r["transaction_description"].ToString().IndexOf("sell", StringComparison.OrdinalIgnoreCase) >= 0)
-                        .Average(r => r.Field<double>(variable_sql)).ToString(order_history_formatter), 0, 3));
+                    gridstats.Children.Add(Helpers.GridHelper.CreateTextInGrid(dr_sold.Sum(r => r.Field<double>(variable_sql) * r.Field<double>("quantity") / dr_sold.Sum(q => q.Field<double>("quantity")))
+                        .ToString(order_history_formatter), 0, 3));
                 }
-                label_assetclassprice.Text = asset + ": Order History and " + (new [] { "Treasuries", "Bonds", "CDs" }.Contains(asset) ? "Yields" : "Price (Adjusted For Splits and Dividends)");
+
+                label_assetclassprice.Text = asset + ": Order History and " + (new[] { "Treasuries", "Bonds", "CDs" }.Contains(asset) ? "Yields" : "Price (Adjusted For Splits and Dividends)");
                 label_secstats.Text = "Statistics for " + asset;
                 PriceChart.DataContext = this;
             });
