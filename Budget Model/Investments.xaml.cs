@@ -159,7 +159,7 @@ namespace Budget_Model
                 if (date == null)
                 {
                     date_selected_to = Convert.ToDateTime(date_month_to.SelectedDate);
-                    date_selected_from = Convert.ToDateTime(date_month_to.SelectedDate).AddMonths(-3);
+                    date_selected_from = Convert.ToDateTime(date_month_from.SelectedDate);
                 }
                 else
                 {
