@@ -119,7 +119,7 @@
             <ComboBoxItem Selector.IsSelected="True" >All</ComboBoxItem>
         </ComboBox>
         <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Name="DataGridDefinitions" BeginningEdit="GridBeginningEdit" CellEditEnding="GridCellEditEnding" 
-                  ItemsSource="{Binding}" AutoGenerateColumns="False" Margin="10" ColumnWidth="*" CanUserAddRows="False">
+                  ItemsSource="{Binding}" AutoGenerateColumns="False" Margin="10" ColumnWidth="*" CanUserAddRows="False" PreviewKeyDown="onDeleteRow">
             <DataGrid.Columns>
                 <DataGridComboBoxColumn Header="Holder" Width="Auto" x:Name="Holders" 
                     SelectedValueBinding="{Binding holder}"  

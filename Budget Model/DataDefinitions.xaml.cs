@@ -355,6 +355,25 @@ namespace Budget_Model
             }
         }
 
-
+        private void onDeleteRow(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            var grid = (DataGrid)sender;
+            if (System.Windows.Input.Key.Delete == e.Key && e.OriginalSource.GetType() != typeof(TextBox) && grid.SelectedItems.Count > 0 && grid.SelectedItems[0].GetType() == typeof(DataRowView))
+            {
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this row?", "Delete Entry", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.Yes)
+                {
+                    foreach (DataRowView row in grid.SelectedItems)
+                    {
+                        BankTransaction transaction = new BankTransaction();
+                        transaction.Delete(Convert.ToInt32(row.Row.ItemArray[0]));
+                    }
+                }
+                else
+                {
+                    e.Handled = true;
+                }
+            }
+        }
     }
 }

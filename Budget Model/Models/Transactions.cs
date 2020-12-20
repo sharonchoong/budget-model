@@ -70,6 +70,21 @@ namespace Budget_Model.Models
             }
         }
 
+        public void Delete(int id)
+        {
+            using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
+            {
+                string qry = "DELETE FROM Entries WHERE id = @id";
+                using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
+                {
+                    cmd.Parameters.Add("@id", DbType.Int32).Value = id;
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                    conn.Close();
+                }
+            }
+        }
+
         public static Tuple<DateTime, DateTime> GetDates(string holder)
         {
             using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
