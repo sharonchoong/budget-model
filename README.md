@@ -58,6 +58,10 @@ The following files can be personalized.
 2. The database - SQLite
 	- For illustration, the app currently uses a sample database *BudgetData_Sample.db*.  In the database, the Categories and InvestmentCategories tables store the list of categories used by the application.  All other tables are filled by user input and may be modified. SQLite was used. It is lightweight and suitable for local data storage.
 	
+## Other notable items
+- A note on percentage gain/loss calculation in *Investments*
+	- Monthly percentage gain/loss in investment is computed by the change in investment value divided by the value of all assets as of the end of the previous month, including deposits held in banks. This approach computes the opportunity cost of holding cash, although it does not account for cash that is never intended to be invested such as an emergency fund.
+
 ## License
 
 This project is licensed under GNU AGPLv3, which makes the complete source code available, but any work using the code must be similarly licensed open-source under AGPL.

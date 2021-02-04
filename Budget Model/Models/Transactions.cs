@@ -329,8 +329,9 @@ namespace Budget_Model.Models
                     else if (datatype == "Percentage" || datatype == "Cumulative Percentage")
                     {
                         qry = @";WITH t as
-                        (SELECT a.[date], b.holder, SUM(a.amount) as gain, ending_mkt_value
-                        FROM EndMarketValues b LEFT JOIN Statements a ON DATE(a.[date]) = DATE(b.[date],'start of month','+2 month','-1 day') and a.holder = b.holder
+                        (SELECT a.[date], b.holder, SUM(a.amount) as gain, ending_mkt_value + RunningBalance as ending_mkt_value
+                        FROM EndMarketValues b LEFT JOIN MonthlyBalance c ON DATE(c.[period]) = DATE(b.[date]) and c.holder = b.holder
+                        LEFT JOIN Statements a ON DATE(a.[date]) = DATE(b.[date],'start of month','+2 month','-1 day') and a.holder = b.holder
                         WHERE a.category = 'Investment Gains' AND DATE(a.[date]) BETWEEN DATE(@start) and DATE(@end) 
                         GROUP BY DATE(a.[date]), b.holder, ending_mkt_value )
                         SELECT [date], holder, gain/ending_mkt_value as amount FROM t
