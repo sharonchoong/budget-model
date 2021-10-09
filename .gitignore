@@ -8,3 +8,4 @@ Budget Model/App_Data/BudgetData.db
 # Budget Model/Connections.config
 # Budget Model/CustomAppSettings.config
 .vs/
+.git

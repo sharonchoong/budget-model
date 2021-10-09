@@ -200,12 +200,12 @@ namespace Budget_Model.Models
                     string qry = "";
                     if (category == "Trading Account")
                     {
-                        qry = "select date, asset_symbol as category, asset_description as description, ending_mkt_value as amount from FinancialAssets WHERE date([date]) = date(@end)";
+                        qry = "select date(date) as date, asset_symbol as category, asset_description as description, ending_mkt_value as amount from FinancialAssets WHERE date([date]) = date(@end)";
                         qry += ((selected_person != "Home") ? " AND holder = @holder" : "");
                     }
                     else
                     {
-                        qry = "select date, category, description, amount from Statements WHERE";
+                        qry = "select date(date) as date, category, description, amount from Statements WHERE";
                         if (selected_person != "Home")
                         {
                             qry += " holder = @holder AND";

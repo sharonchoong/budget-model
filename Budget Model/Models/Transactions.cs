@@ -402,7 +402,11 @@ namespace Budget_Model.Models
                 {
                     qry += @" INNER JOIN (SELECT holder, max(date(date)) as maxdate from GrossSalary GROUP BY holder) a 
                         ON GrossSalary.holder = a.holder and date(GrossSalary.date) = date(a.maxdate) ";
-                    qry += " WHERE GrossSalary.holder = @holder" + (default_salary ? "" : " and date(date) = date(@date)");
+                }
+                qry += " WHERE GrossSalary.holder = @holder";
+                if (!default_salary)
+                {
+                    qry += " and date(date) = date(@date)";
                 }
                 using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
                 {
