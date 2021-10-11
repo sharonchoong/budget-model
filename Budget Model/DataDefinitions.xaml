@@ -96,11 +96,11 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Grid.Column="0" Margin="20" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <TextBlock Margin="0,0,0,0"  VerticalAlignment="Center">Default Gross Salary: $</TextBlock>
+                <TextBlock Margin="0,0,0,0"  VerticalAlignment="Center">Default Gross Salary: </TextBlock>
                 <TextBlock Margin="0,0,10,0"  VerticalAlignment="Center" Name="default_gross_salary" HorizontalAlignment="Right">0</TextBlock>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="1" Margin="20" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <TextBlock Margin="0,0,10,0"  VerticalAlignment="Center">Gross Salary ($)</TextBlock>
+                <TextBlock Margin="0,0,10,0"  VerticalAlignment="Center">Gross Salary</TextBlock>
                 <DatePicker Grid.Row="1" Grid.Column="0" SelectedDateChanged="SalaryDate_SelectedDateChanged"
                     local:DatePickerCalendar.IsMonthYear="True" local:DatePickerDateFormat.DateFormat="MM/dd/yyyy"
                     x:Name="date_month" AllowDrop="True" HorizontalAlignment="Center" VerticalAlignment="Center"></DatePicker>

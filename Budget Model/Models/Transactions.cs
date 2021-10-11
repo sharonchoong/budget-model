@@ -143,17 +143,20 @@ namespace Budget_Model.Models
         public string Bank { get; set; }
         public double Price { get; set; }
         public double Quantity { get; set; }
+        public double Fees { get; set; }
         public double Amount
         {
             get
             {
-                return Price * Quantity;
+                return Price * Quantity + Fees;
             }
             set
             {
                 Price = value / Quantity;
             }
         }
+        public string LocalCurrencySymbol { get; set; }
+        public double LocalCurrencyPrice { get; set; }
         public string Symbol { get; set; }
         public DateTime? MaturityDate { get; set; } = null;
         public double? CouponRate { get; set; } = null;
@@ -163,6 +166,23 @@ namespace Budget_Model.Models
         {
             Price = price;
             Quantity = quantity;
+            Symbol = symbol;
+        }
+
+        public BrokerageTransaction(string local_currency_symbol, double local_currency_price, double quantity, double fees, string symbol)
+        {
+            LocalCurrencyPrice = local_currency_price;
+            LocalCurrencySymbol = local_currency_symbol;
+            Quantity = quantity;
+            Fees = fees;
+            Symbol = symbol;
+        }
+
+        public BrokerageTransaction(double price, double quantity, double fees, string symbol)
+        {
+            Price = price;
+            Quantity = quantity;
+            Fees = fees;
             Symbol = symbol;
         }
 
@@ -178,11 +198,11 @@ namespace Budget_Model.Models
 
         public void Save()
         {
-            if (Date != null && Price != 0 && Description != null && Symbol != null)
+            if (Date != null && (Price != 0 || (LocalCurrencyPrice != 0 && LocalCurrencySymbol != null)) && Description != null && Symbol != null)
             {
                 string _query = "INSERT INTO [InvestmentTransactions] ";
-                _query += "(asset_symbol,date,transaction_description,holder,bank,price,quantity, maturity, coupon_rate, yield_to_maturity) ";
-                _query += "SELECT @symbol, @date, @description, @holder, @bank, @price, @quantity, @maturity, @coupon, @yield ";
+                _query += "(asset_symbol,date,transaction_description,holder,bank,price,quantity, fees, local_currency_price, local_currency_symbol, maturity, coupon_rate, yield_to_maturity) ";
+                _query += "SELECT @symbol, @date, @description, @holder, @bank, @price, @quantity, @fees, @local_currency_price, @local_currency_symbol, @maturity, @coupon, @yield ";
                 _query += " WHERE NOT EXISTS (SELECT * FROM [InvestmentTransactions] WHERE date(date)=date(@date) and asset_symbol=@symbol ";
                 _query += " and transaction_description=@description and holder=@holder and bank=@bank); ";
 
@@ -195,7 +215,16 @@ namespace Budget_Model.Models
                         comm.Parameters.Add("@description", DbType.String, 500).Value = Description;
                         comm.Parameters.Add("@holder", DbType.String, 50).Value = Holder;
                         comm.Parameters.Add("@bank", DbType.String, 50).Value = Bank + "_broker";
-                        comm.Parameters.Add("@price", DbType.Double).Value = Price;
+                        if (LocalCurrencySymbol != null)
+                        {
+                            double exchange_rate = CurrencyTransaction.GetMostRecentExchangeRate(LocalCurrencySymbol, Bank + "_broker", Date);
+                            comm.Parameters.Add("@price", DbType.Double).Value = LocalCurrencyPrice / exchange_rate;
+                        }
+                        else
+                            comm.Parameters.Add("@price", DbType.Double).Value = Price;
+                        comm.Parameters.Add("@fees", DbType.Double).Value = Fees;
+                        comm.Parameters.Add("@local_currency_price", DbType.Double).Value = LocalCurrencyPrice;
+                        comm.Parameters.Add("@local_currency_symbol", DbType.String).Value = LocalCurrencySymbol;
                         comm.Parameters.Add("@quantity", DbType.Double).Value = Quantity;
                         if (MaturityDate != null)
                         {
@@ -222,7 +251,7 @@ namespace Budget_Model.Models
             DataTable dt = new DataTable();
             using (SQLiteDataAdapter adapter = new SQLiteDataAdapter())
             {
-                string qry = @"SELECT *, price * quantity as mkt_value FROM InvestmentTransactions a 
+                string qry = @"SELECT *, (price * quantity) + COALESCE(fees, 0) as mkt_value FROM InvestmentTransactions a  
                         WHERE date(a.[date]) BETWEEN date(@start) AND date(@end) ";
                 if (asset == "Treasuries")
                 {
@@ -250,6 +279,93 @@ namespace Budget_Model.Models
                 }
             }
             return dt;
+        }
+    }
+
+    public class CurrencyTransaction : ITransaction
+    {
+        public DateTime Date { get; set; }
+        public string Category { get; set; }
+        public string Description { get; set; }
+        public string Holder { get; set; }
+        public string Bank { get; set; }
+        public double Price { get; set; }
+        public double Quantity { get; set; }
+        public double Amount
+        {
+            get
+            {
+                return Price * Quantity;
+            }
+            set
+            {
+                Price = value / Quantity;
+            }
+        }
+        public string LocalCurrencySymbol { get; set; }
+        public CurrencyTransaction(double price, double quantity, string currency_symbol)
+        {
+            Price = price;
+            Quantity = quantity;
+            LocalCurrencySymbol = currency_symbol;
+        }
+
+        public void Save()
+        {
+            if (Date != null && Price != 0 && Description != null && LocalCurrencySymbol != null)
+            {
+                string _query = "INSERT INTO [InvestmentTransactions] ";
+                _query += "(date,transaction_description,holder,bank,price,quantity, local_currency_price, local_currency_symbol, asset_symbol) ";
+                _query += "SELECT @date, @description, @holder, @bank, @price, @quantity, 1, @local_currency_symbol, @local_currency_symbol ";
+                _query += " WHERE NOT EXISTS (SELECT * FROM [InvestmentTransactions] WHERE date(date)=date(@date) and local_currency_symbol=@local_currency_symbol ";
+                _query += " and transaction_description=@description and holder=@holder and bank=@bank); ";
+
+                using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
+                {
+                    using (SQLiteCommand comm = new SQLiteCommand(_query, conn))
+                    {
+                        comm.Parameters.Add("@local_currency_symbol", DbType.String, 250).Value = LocalCurrencySymbol;
+                        comm.Parameters.AddWithValue("@date", Date.ToString("yyyy-MM-dd"));
+                        comm.Parameters.Add("@description", DbType.String, 500).Value = Description;
+                        comm.Parameters.Add("@holder", DbType.String, 50).Value = Holder;
+                        comm.Parameters.Add("@bank", DbType.String, 50).Value = Bank + "_broker";
+                        comm.Parameters.Add("@price", DbType.Double).Value = Price;
+                        comm.Parameters.Add("@quantity", DbType.Double).Value = Quantity;
+
+                        conn.Open();
+                        comm.ExecuteNonQuery();
+                        conn.Close();
+                    }
+                }
+            }
+        }
+
+        public static double GetMostRecentExchangeRate(string currency_symbol, string bank, DateTime? date = null)
+        {
+            double exchange_rate = 0;
+            using (SQLiteDataAdapter adapter = new SQLiteDataAdapter())
+            {
+                string qry = @"SELECT price FROM InvestmentTransactions WHERE local_currency_symbol = @currency_symbol AND asset_symbol = @currency_symbol AND bank = @bank ";
+                if (date.HasValue)
+                    qry += " ORDER BY abs(strftime('%s',date(date)) - strftime('%s', date(@date))) ";
+                else
+                    qry += " ORDER BY date([date]) DESC";
+                qry += " LIMIT 1";
+                using (SQLiteConnection conn = new SQLiteConnection(ConfigurationManager.ConnectionStrings["BudgetDataConnectionString"].ConnectionString))
+                {
+                    using (SQLiteCommand cmd = new SQLiteCommand(qry, conn))
+                    {
+                        cmd.Parameters.Add("@bank", DbType.String, 50).Value = bank;
+                        cmd.Parameters.Add("@currency_symbol", DbType.String, 250).Value = currency_symbol;
+                        if (date.HasValue)
+                            cmd.Parameters.AddWithValue("@date", date.Value.ToString("yyyy-MM-dd"));
+                        conn.Open();
+                        exchange_rate = Convert.ToDouble(cmd.ExecuteScalar());
+                        conn.Close();
+                    }
+                }
+            }
+            return exchange_rate;
         }
     }
 

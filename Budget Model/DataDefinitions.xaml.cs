@@ -329,7 +329,7 @@ namespace Budget_Model
             {
                 Salary current_salary = new Salary();
                 current_salary.Holder = HoldersItems.Where(r => r.IsChecked == true).Select(x => x.HolderName).First();
-                default_gross_salary.Text = current_salary.Get(true);
+                default_gross_salary.Text = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencySymbol + current_salary.Get(true);
                 if (default_gross_salary.Text == "")
                     default_gross_salary.Text = "0";
             }
@@ -339,7 +339,7 @@ namespace Budget_Model
         {
             Salary new_salary = new Salary();
             new_salary.Holder = HoldersItems.Where(r => r.IsChecked == true).Select(x => x.HolderName).First();
-            new_salary.Amount = Convert.ToDouble(default_gross_salary.Text);
+            new_salary.Amount = Convert.ToDouble(default_gross_salary.Text.Replace(System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencySymbol, ""));
             var salary_dates = new_salary.GetDates();
             if (salary_dates != null)
             {

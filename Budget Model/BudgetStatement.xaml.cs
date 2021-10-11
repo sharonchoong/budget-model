@@ -189,7 +189,7 @@ namespace Budget_Model
                         TextBlock selected_txt = NetWorthGrid.Children.Cast<TextBlock>().Where(e => Grid.GetColumn(e) == c && Grid.GetRow(e) == r).FirstOrDefault();
                         if (selected_txt != null)
                         {
-                            amount += Convert.ToDouble(selected_txt.Text.Replace("$", "").Replace(",", ""));
+                            amount += Convert.ToDouble(selected_txt.Text.Replace(CultureInfo.CurrentCulture.NumberFormat.CurrencySymbol, "").Replace(",", ""));
                         }
                     }
                     txt_total_accounttype = Helpers.GridHelper.CreateTextInGrid(string.Format("{0:C2}", amount), row, c, false, HorizontalAlignment.Right, true, false, true);

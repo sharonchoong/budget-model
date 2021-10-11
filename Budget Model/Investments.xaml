@@ -191,7 +191,9 @@
                     <DataGridTextColumn Header="Symbol" IsReadOnly="True" Width="Auto" Binding="{Binding asset_symbol}" />
                     <DataGridTextColumn Header="Description" IsReadOnly="True" Binding="{Binding transaction_description}" FontSize="10" />
                     <DataGridTextColumn Header="Price" IsReadOnly="True" Width="Auto" Binding="{Binding price, StringFormat=\{0:C2\}}" CellStyle="{StaticResource RightAlignment}" />
+                    <DataGridTextColumn Header="Local Price" IsReadOnly="True" Width="Auto" Binding="{Binding local_currency_price}" CellStyle="{StaticResource RightAlignment}" />
                     <DataGridTextColumn Header="Quantity" IsReadOnly="True" Width="Auto" Binding="{Binding quantity}" CellStyle="{StaticResource RightAlignment}" />
+                    <DataGridTextColumn Header="Fees" IsReadOnly="True" Width="Auto" Binding="{Binding fees, StringFormat=\{0:C2\}}" CellStyle="{StaticResource RightAlignment}" />
                     <DataGridTextColumn Header="Mkt Value" IsReadOnly="True" Width="Auto" Binding="{Binding mkt_value, StringFormat=\{0:C0\}}" CellStyle="{StaticResource RightAlignment}" />
                     <DataGridTextColumn Header="YTM" IsReadOnly="True" Width="Auto" Binding="{Binding yield_to_maturity, StringFormat=\{0:P2\}}" CellStyle="{StaticResource RightAlignment}" />
                     <DataGridTextColumn Header="Maturity" IsReadOnly="True" Width="Auto" Binding="{Binding maturity, StringFormat=\{0:MM/dd/yyyy\}}" />

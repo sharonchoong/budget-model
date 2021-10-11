@@ -73,9 +73,27 @@ namespace Budget_Model.Helpers
                                     switch (bank.Account.FinancialInstitution.InstitutionName)
                                     {
                                         case "BrokerageSample":
-                                            string[] quantity_price = csv.GetField(4).ToString().Split(new string[] { " shares at�$", " share at�$" }, StringSplitOptions.None);
-                                            new_transaction = new BrokerageTransaction(Convert.ToDouble(quantity_price[1].Replace(",", "")), Convert.ToDouble(quantity_price[0]), csv.GetField(2));
                                             description = csv.GetField(1);
+                                            if (description.Contains("Exchanged "))
+                                            {
+                                                string[] quantity_price = csv.GetField(4).ToString().Split(new string[] { " at ", "  at " }, StringSplitOptions.None);
+                                                new_transaction = new CurrencyTransaction(Convert.ToDouble(new string(quantity_price[1].Where(c => "01234567890.,".Contains(c)).ToArray())),
+                                                    Convert.ToDouble(new string(quantity_price[0].Where(c => "01234567890.,".Contains(c)).ToArray())), csv.GetField(2));
+                                            } else
+                                            {
+                                                double fees = Convert.ToDouble(csv.GetField(6));
+                                                if (csv.GetField(5) != "USD")
+                                                {
+                                                    string[] quantity_price = csv.GetField(4).ToString().Split(new string[] { " shares at�", " share at�" }, StringSplitOptions.None);
+                                                    new_transaction = new BrokerageTransaction(csv.GetField(5).ToString(), Convert.ToDouble(new string(quantity_price[1].Where(c => "01234567890.,".Contains(c)).ToArray()) ), 
+                                                        Convert.ToDouble(quantity_price[0]), fees, csv.GetField(2));
+                                                } else
+                                                {
+                                                    string[] quantity_price = csv.GetField(4).ToString().Split(new string[] { " shares at�$", " share at�$" }, StringSplitOptions.None);
+                                                    new_transaction = new BrokerageTransaction(Convert.ToDouble(quantity_price[1].Replace(",", "")), Convert.ToDouble(quantity_price[0]), fees, csv.GetField(2));
+                                                }
+                                            }
+                                            
                                             break;
                                         default:
                                             break;

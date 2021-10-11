@@ -186,53 +186,53 @@
                         FontStyle="Italic" Foreground="DarkSlateBlue" HorizontalAlignment="Left" VerticalAlignment="Center" MouseLeftButtonDown="UpdateGrid" />
 
             <!-- all amounts -->
-            <TextBlock  Grid.Row="1" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_gross_salary"
+            <TextBlock  Grid.Row="1" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_gross_salary"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="2" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_ret_contribution"
+            <TextBlock  Grid.Row="2" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_ret_contribution"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="3" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_other_withholding"
+            <TextBlock  Grid.Row="3" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_other_withholding"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="4" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_netpay"
+            <TextBlock  Grid.Row="4" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_netpay"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="5" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_ret_income"
+            <TextBlock  Grid.Row="5" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_ret_income"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="6" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_other_income"
+            <TextBlock  Grid.Row="6" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_other_income"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="7" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_total_income"
+            <TextBlock  Grid.Row="7" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_total_income"
                    HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
-            <TextBlock  Grid.Row="9" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_rent"
+            <TextBlock  Grid.Row="9" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_rent"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="10" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_utilities"
+            <TextBlock  Grid.Row="10" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_utilities"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="11" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_commute"
+            <TextBlock  Grid.Row="11" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_commute"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="12" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_groceries"
+            <TextBlock  Grid.Row="12" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_groceries"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="13" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_restaurants"
+            <TextBlock  Grid.Row="13" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_restaurants"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="14" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_cash"
+            <TextBlock  Grid.Row="14" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_cash"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="15" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_living_expense"
+            <TextBlock  Grid.Row="15" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_living_expense"
                    HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="DemiBold" />
-            <TextBlock  Grid.Row="16" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_shopping"
+            <TextBlock  Grid.Row="16" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_shopping"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="17" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_entertainment"
+            <TextBlock  Grid.Row="17" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_entertainment"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="18" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_travel"
+            <TextBlock  Grid.Row="18" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_travel"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="19" Grid.Column="1" Text="$0.00" Margin="10,2,10,2" Name="amt_medical"
+            <TextBlock  Grid.Row="19" Grid.Column="1" Text="0.00" Margin="10,2,10,2" Name="amt_medical"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="20" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_other_expense"
+            <TextBlock  Grid.Row="20" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_other_expense"
                    HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="DemiBold" />
-            <TextBlock  Grid.Row="21" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_total_expense"
+            <TextBlock  Grid.Row="21" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_total_expense"
                    HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
-            <TextBlock  Grid.Row="22" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_savings_before_misc"
+            <TextBlock  Grid.Row="22" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_savings_before_misc"
                    HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
-            <TextBlock  Grid.Row="23" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_misc"
+            <TextBlock  Grid.Row="23" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_misc"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="24" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_investment_gains"
+            <TextBlock  Grid.Row="24" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_investment_gains"
                    HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock  Grid.Row="25" Grid.Column="2" Text="$0.00" Margin="10,2,10,2" Name="amt_net_savings"
+            <TextBlock  Grid.Row="25" Grid.Column="2" Text="0.00" Margin="10,2,10,2" Name="amt_net_savings"
                    HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
         </Grid>
         <TextBlock  Grid.Row="1" Grid.Column="2" Text="Income/Expense Breakdown compared to Last Month" Margin="73,12,73,12" FontWeight="Bold"
